@@ -150,7 +150,7 @@ js/
   stage.js              INAV.stage: fit-to-window scaling, safe-area math
   popups.js             INAV.popups: create, spawn (with bloom placement), close, clear, count
   hud.js                INAV.hud: renders taskbar (closed, open n/CAP, progress, seconds, clock)
-  screens.js            INAV.screens: show(name), per-screen enter logic (title stats, results)
+  screens.js            INAV.screens: show(phase, snapshot) maps a phase to its [data-screen] section; per-screen enter logic (title stats, results, lockouts)
   game.js               INAV.game: round state, rAF loop, spawn timer, crash/win detection
   debug.js              INAV.debug: overlay toggled with the D key (t, interval, open, score, screen)
   main.js               wires buttons/events, boots to Title
@@ -182,7 +182,7 @@ Each iteration is a playable checkpoint, and every one runs the same cycle:
 1. **Questions.** Rickey answers the iteration's clarifying questions. The answers are recorded in the §3 decisions log.
 2. **Plan.** An implementation plan is written for that iteration only.
 3. **Build.** Claude implements it, with the mechanics guide below as the reference for how each mechanic works.
-4. **Manual test.** Rickey plays it against the checklist.
+4. **Manual test.** Rickey plays it against the checklist. Every check uses real mouse clicks and key presses. Scripted `dispatchEvent` calls skip the browser's hit-testing, and in iteration 2 they hid a bug where the practice pop-up couldn't be clicked.
 5. **Feedback.** Rickey sends feedback, assets and rule changes, and the spec is updated before the next iteration.
 
 Each mechanic guide uses the same five parts: **What:** what the player experiences. **How:** how the code does it. **Knobs:** what to change in `config.js`. **Test:** how to check it by hand. **Broken:** what failure looks like.
@@ -285,7 +285,7 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 
 **Screen state machine**
 - **What:** exactly one screen is active at a time.
-- **How:** `screens.show(name)` sets `hidden` on every `.screen` except the named one and runs that screen's enter logic, such as filling in scores. `game` checks `state === 'play'` before doing anything.
+- **How:** `game` owns `phase` and calls `screens.show(phase, snapshot)` on every change. `show` maps the phase to a `[data-screen]` section (for example, `crashing` shows the play screen), sets `hidden` on all the others, and runs that screen's enter logic, such as filling in scores. Screen sections let clicks through (`pointer-events: none`) except on their buttons and dialogs and on the full-cover pause and crash screens, so pop-ups under a screen stay clickable.
 - **Knobs:** none.
 - **Test:** walk every arrow in §4. No two screens should ever show together.
 - **Broken:** the Title shows through behind Gameplay, or pop-ups carry over onto the Title.
