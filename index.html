@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/desktop.css">
   <link rel="stylesheet" href="css/window.css">
+  <link rel="stylesheet" href="css/screens.css">
 </head>
 <body>
   <div id="stage">
@@ -15,6 +16,24 @@
     </div>
 
     <div id="popups"></div>
+
+    <section data-screen="start">
+      <div class="panel">
+        <h1>imnotavirus.exe</h1>
+        <p>Grey-box build. Close pop-ups for 60 seconds. 12 open = crash.</p>
+        <button class="temp-btn" id="start-btn">click to start</button>
+      </div>
+    </section>
+
+    <section data-screen="play" hidden></section>
+
+    <section data-screen="end" hidden>
+      <div class="panel">
+        <h1 id="end-title">CRASHED</h1>
+        <p id="end-detail"></p>
+        <button class="temp-btn" id="restart-btn">restart</button>
+      </div>
+    </section>
 
     <div id="taskbar">
       <span class="hud-start">start</span>
@@ -31,6 +50,9 @@
   <script src="js/config.js"></script>
   <script src="js/stage.js"></script>
   <script src="js/popups.js"></script>
+  <script src="js/hud.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/game.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

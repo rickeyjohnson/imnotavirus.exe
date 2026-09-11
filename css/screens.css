@@ -1,0 +1,53 @@
+[data-screen] {
+  position: absolute;
+  inset: 0 0 var(--taskbar) 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-screen][hidden] {
+  display: none;
+}
+
+[data-screen="play"] {
+  pointer-events: none;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 32px;
+  background: var(--paper);
+  border: var(--line) solid var(--ink);
+  text-align: center;
+}
+
+.panel h1 {
+  margin: 0;
+  font-size: 40px;
+}
+
+.panel p {
+  margin: 0;
+  font-size: 18px;
+}
+
+.temp-btn {
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 10px 28px;
+  background: var(--warn);
+  color: var(--ink);
+  border: var(--line) solid var(--ink);
+  cursor: pointer;
+}
+
+.temp-btn:focus-visible {
+  outline: 4px solid var(--ink);
+  outline-offset: 3px;
+}
