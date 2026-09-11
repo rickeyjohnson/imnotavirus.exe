@@ -19,7 +19,7 @@
 - All shared code hangs off `window.INAV`, one IIFE per file (`config.js` bootstraps, `main.js` defines none).
 - Every tuning number lives in `js/config.js`.
 - Colors are only these six tokens: `#00CAFF`, `#FFFFFF`, `#FAF900`, `#FF0057`, `#273548`, `#0078FD`. The sole exception is the existing pause dim, `rgba(39, 53, 72, 0.35)`. Inline SVG uses `var(--token)`, never raw hex.
-- No raw pixel values for border weight or corner radius: use `var(--line)` and `var(--radius)` (or a `calc()` on them) so the anchor asset drives the whole game.
+- No raw pixel values for border weight or corner radius: use `var(--line)`, `var(--line-thin)` and `var(--radius)` (or a `calc()` on them) so the anchor asset drives the whole game. Two sanctioned exceptions: `border-radius: 999px` for pill shapes (a shape, not a size) and `border-radius: 50%` for circles, plus the flag squares' own 2px gap and radius.
 - Per the GDD: no gradients (the bar's hard-stop diagonal stripes are the one allowed exception, matching the sketch), no textures, no realistic shadows, no serif or thin fonts. Flat offset shadows on buttons are allowed.
 - Keep comments minimal.
 - No unit tests. Verify with `node --check`, the per-task structural checks, and the controller's real-input browser pass.
@@ -696,7 +696,7 @@ git commit -m "feat: draw desktop icons and the XP-parody taskbar"
 
 **Files:**
 - Rewrite: `css/screens.css`
-- Modify: `index.html`, `js/game.js`, `js/screens.js`
+- Modify: `index.html`, `js/game.js`, `js/screens.js`, `css/desktop.css`
 
 **Interfaces:**
 - `INAV.game.snapshot()` gains `scores: { last, best }`, kept in game state and mirrored to storage. `game` becomes the only module that reads or writes storage.
@@ -704,6 +704,16 @@ git commit -m "feat: draw desktop icons and the XP-parody taskbar"
 - Behavior is otherwise unchanged.
 
 **Do not weaken the pointer-events rules.** The first four rules of the stylesheet below are the iteration 2 critical fix (screens must let clicks reach the pop-ups); keep them exactly as written.
+
+- [ ] **Step 0: Pill radius on the meter (carried from the Task 3 review)**
+
+In `css/desktop.css`, in the `.hud-meter` rule, replace `border-radius: 11px;` with:
+
+```css
+  border-radius: 999px;
+```
+
+That is the same pill idiom the tagline and badge use below, instead of a hand-computed half-height.
 
 - [ ] **Step 1: Rewrite `css/screens.css`**
 
@@ -1007,7 +1017,7 @@ Manual (controller): every screen matches the demo's look in Fredoka/Rubik. The 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add css/screens.css index.html js/game.js js/screens.js
+git add css/screens.css index.html js/game.js js/screens.js css/desktop.css
 git commit -m "feat: style every screen and move score ownership into game"
 ```
 
