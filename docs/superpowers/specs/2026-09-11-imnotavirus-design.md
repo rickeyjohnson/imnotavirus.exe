@@ -28,25 +28,29 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Win screen | **Keep a Success screen** | Overrides the GDD "Cut" list; kept as a plain results dialog so replay stays the focus |
 | Lose rule | **Pop-up count cap**: crash the instant `open >= CAP` | `CAP = 12` to start; tunable |
 | Close input | **Click anywhere on a pop-up** | Matches the GDD cut of precision clicking; uses `pointerdown` for speed |
-| Tutorial | **One practice pop-up + instruction bar** | Closing it starts the round. Shown on every Start from Title |
-| Retry | "try again" / "play again" go **straight to Gameplay** | Skips the tutorial for fast replay. "Back to desktop" goes to Title |
+| Tutorial | **One practice pop-up + instruction bar** | Closing it starts the round. Shown on every Start from Title (confirmed in iter 2 Q1) |
+| Retry (iter 2 Q2) | "try again" / "play again" go **back to the Title** | Every round then runs Title → Tutorial → Gameplay. There's no separate "Back to desktop" link; the retry button is it |
 | Pop-up variety | **One type in V1**; variety in iteration 5 | Warning / error / downloading types come later |
 | Window resizing | Fixed 1280×720 stage, scaled to fit, letterboxed | Resolves GDD fragile items #1 and #3 |
 | Code authorship (iter 1 Q1) | Claude writes the code with **minimal comments** | The mechanics guide (§9) does the explaining |
 | Starting difficulty (iter 1 Q2) | Keep `CAP = 12` and the 1100 → 360 ms ramp | Real tuning happens in iteration 4 |
 | Round start (iter 1 Q3) | Temporary "click to start" button plus a plain-text end state with "restart" | Replaced by real screens in iteration 2 |
 | Pop-up copy (iter 1 Q4) | Demo placeholder joke copy, kept in `config.js` | Rickey can replace it any time |
+| Demo as guide (iter 2) | Screens copy the **mini demo's layout and text** (`docs/reference/mini-demo.html`) with **basic styling** | Palette, system font, simple bordered panels. The demo's full look (fonts, SVG icons, button style, animations) comes in iteration 3 |
+| Pause (iter 2 extras) | **Esc** or clicking the taskbar **start** button pauses and resumes during Gameplay | The timer and spawns freeze, pop-ups can't be clicked, and a "Paused" dialog with a resume button appears |
+| Title score (iter 2 Q3) | `Score:` shows the **last round, win or lose** | Default kept |
+| Reset best (iter 2 Q5) | **Not included** | — |
 
 ## 4. Screens and flow
 
 ```
-Title ──start──▶ Tutorial ──close practice pop-up──▶ Gameplay
+Title ──start──▶ Tutorial ──close practice pop-up──▶ Gameplay ◀── Esc / start button ──▶ Paused
   ▲                                                  │      │
   │                                     open >= CAP  │      │  t >= 60s
   │                                                  ▼      ▼
-  └──────── "Back to desktop" ─────────────── Game Over   Success
-                                                  │          │
-                          "try again" / "play again" ──▶ Gameplay
+  │                                             Game Over   Success
+  │                                                  │          │
+  └─────────────── "try again" / "play again" ───────┴──────────┘
 ```
 
 | Screen | Contents (from sketches) |
@@ -54,10 +58,11 @@ Title ──start──▶ Tutorial ──close practice pop-up──▶ Gamepla
 | **Title** | Desktop, faded "ghost" pop-ups in the background, `imnotavirus.exe` title, **start** button, `Score:` (last round) and `Best:`, taskbar |
 | **Tutorial** | Desktop + recycle bin, one practice pop-up in the center, instruction bar above the taskbar, antivirus progress bar at 0% |
 | **Gameplay** | Desktop + recycle bin, spawning pop-ups, taskbar showing closed count, open count `n/12`, antivirus progress bar and seconds remaining |
-| **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, **try again**, "Back to desktop" |
-| **Success** | Desktop + recycle bin, a results dialog ("Installation complete"), Score, Best, "New best" badge when earned, **play again**, "Back to desktop", progress bar full |
+| **Paused** | Gameplay stays visible behind a dimmed overlay with a "Paused" dialog and a **resume** button |
+| **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, a "New best" badge when earned, **try again** (goes to Title) |
+| **Success** | Desktop + recycle bin, a results dialog ("Installation complete"), Score, Best, "New best" badge when earned, **play again** (goes to Title), progress bar full |
 
-Screen states (in code): `title`, `tutorial`, `play`, `crashing` (a ~400 ms shake before Game Over), `crash`, `success`.
+Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `success`.
 
 ## 5. Gameplay rules
 
@@ -262,18 +267,19 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 **Goal:** the full loop from the sketches. Title → Tutorial → Gameplay → Game Over / Success → back, with persistent last and best scores.
 
 **Carried over from the iteration 1 code review** (the iteration 2 plan must cover these):
-- **One state list:** `game.phase` uses the §4 states (`title, tutorial, play, crashing, crash, success`). `game` owns the timed `crashing` → `crash` transition. `screens` only maps a phase to its visible screen.
+- **One state list:** `game.phase` uses the §4 states (`title, tutorial, play, paused, crashing, crash, success`). `game` owns the timed `crashing` → `crash` transition. `screens` only maps a phase to its visible screen.
 - **Results rendering:** per-screen text (Title stats, Game Over/Success results, the "New best" badge) moves into `screens` enter logic, so `main.js` only wires events.
 - **Spawn options:** `popups.spawn(opts)` accepts at least a fixed position and a practice flag, for the centered practice pop-up.
 - **Clean screens:** pop-ups are cleared when leaving gameplay (Success and Title show a clean desktop), and the HUD shows zeroed values on Title.
 - **Copy from config:** screen text that mentions numbers (60 seconds, 12 open) reads them from `INAV.config`.
 
-**Questions for Rickey**
-1. **Tutorial frequency:** show the tutorial on every Start, as decided, or only the first time you ever play?
-2. **Retry route:** keep "try again" and "play again" skipping the tutorial and going straight to Gameplay?
-3. **Title score line:** should `Score:` show the last round (win or lose) or only the last win?
-4. **Pause:** add a pause on Esc, or no pausing to keep it tense?
-5. **Reset best:** add a hidden way to reset best, e.g. for class demos?
+**Questions for Rickey** (answered 2026-09-11, see §3)
+1. **Tutorial frequency:** show the tutorial on every Start, as decided, or only the first time you ever play? **Every Start.**
+2. **Retry route:** keep "try again" and "play again" skipping the tutorial and going straight to Gameplay? **No, they go back to the Title.**
+3. **Title score line:** should `Score:` show the last round (win or lose) or only the last win? **Last round.**
+4. **Pause:** add a pause on Esc, or no pausing to keep it tense? **Yes: Esc, and also the taskbar start button.**
+5. **Reset best:** add a hidden way to reset best, e.g. for class demos? **No.**
+6. **Demo as guide:** how closely should the screens follow the mini demo? **Demo layout and text, basic styling.**
 
 **Mechanics guide**
 
@@ -298,12 +304,29 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 - **Test:** play, reload the page, and check the Title. Try once in a private window too.
 - **Broken:** scores reset on reload, or the game fails to load when storage is blocked.
 
+**Crashing beat**
+- **What:** the moment the 12th pop-up lands, everything freezes briefly before the crash screen, so you can see what beat you.
+- **How:** `game` sets phase `crashing`, disables pop-up input and records the score. After `CRASH_DELAY_MS` it clears the pop-ups and sets phase `crash`. The crash screen's "try again" stays disabled for `END_LOCKOUT_MS`.
+- **Knobs:** `CRASH_DELAY_MS`, `END_LOCKOUT_MS`, `CRASH_PCT_TICK_MS` (speed of the "X% complete" counter).
+- **Test:** let it crash while spam-clicking the middle of the screen. The crash screen must not be skipped.
+- **Broken:** the crash screen flashes and immediately returns to Title, or the pop-ups vanish before the pause.
+
+**Pause**
+- **What:** Esc or the taskbar **start** button freezes the round, and pressing either again (or **resume**) continues it.
+- **How:** `game.togglePause()` switches `play` ↔ `paused` and does nothing in any other phase. Only `play` advances `t` and spawns. `lastFrame` keeps updating while paused, so resuming never releases a burst. Pop-up input is disabled while paused.
+- **Knobs:** none.
+- **Test:** pause at about 0:20 for 10 s, then resume. The timer continues from the same second and no burst of pop-ups arrives. Clicking pop-ups while paused does nothing. Esc on the Title does nothing.
+- **Broken:** time keeps running while paused, pop-ups spawn while paused, or pausing works on Game Over / Title.
+
 **Manual test checklist**
-- [ ] Every arrow in the §4 flow works, including both "Back to desktop" links.
+- [ ] Every arrow in the §4 flow works: Title → Tutorial → Gameplay → Game Over / Success → Title.
 - [ ] The practice pop-up doesn't count; closing it starts the round.
-- [ ] Last and best show on Title and survive a reload.
-- [ ] Retry behaves the way Q2 decides.
-- [ ] No leftover pop-ups on any non-gameplay screen.
+- [ ] Last and best show on Title and survive a reload. "New best" appears only when the best is beaten.
+- [ ] "try again" and "play again" go to the Title.
+- [ ] No leftover pop-ups on the Title, Game Over or Success screens. The HUD reads zero on the Title.
+- [ ] Spam-clicking through a crash never skips the crash screen.
+- [ ] Esc and the start button both pause and resume; nothing moves while paused.
+- [ ] Screen text that mentions 60 seconds or 12 pop-ups follows `config.js` (change `CAP` to 8 and reload to check).
 
 ---
 
