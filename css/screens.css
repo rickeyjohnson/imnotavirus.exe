@@ -51,3 +51,8 @@
   outline: 4px solid var(--ink);
   outline-offset: 3px;
 }
+
+.temp-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}

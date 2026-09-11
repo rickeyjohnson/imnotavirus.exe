@@ -22,6 +22,7 @@ INAV.config = {
   SAFE: { left: 130, top: 16, right: 16, bottom: 16 },
 
   CLOSE_ANIM_MS: 100,
+  END_LOCKOUT_MS: 500,
 
   WARN_AT: 7,
   CRIT_AT: 10,

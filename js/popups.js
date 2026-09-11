@@ -63,6 +63,7 @@
 
   function handlePointerDown(e) {
     if (!enabled) return;
+    if (e.button !== 0) return;
     const el = e.target.closest(".popup");
     if (!el || el.classList.contains("closing")) return;
     close(el);

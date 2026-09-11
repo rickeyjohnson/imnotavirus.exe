@@ -16,8 +16,13 @@
       $("end-title").textContent = "SURVIVED";
       $("end-detail").textContent = `Antivirus installed. You closed ${s.score}.`;
     }
+    const restart = $("restart-btn");
+    restart.disabled = true;
     INAV.screens.show("end");
-    $("restart-btn").focus();
+    setTimeout(() => {
+      restart.disabled = false;
+      restart.focus();
+    }, C.END_LOCKOUT_MS);
   });
 
   function begin() {

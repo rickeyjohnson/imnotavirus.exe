@@ -64,6 +64,7 @@
 
   // dt is clamped so a hidden tab can't release a burst of pop-ups when it returns.
   function frame(now) {
+    requestAnimationFrame(frame);
     const dt = Math.min(now - (state.lastFrame || now), C.MAX_DT_MS);
     state.lastFrame = now;
 
@@ -72,8 +73,6 @@
     const s = snapshot();
     INAV.hud.render(s);
     if (INAV.debug) INAV.debug.render(s);
-
-    requestAnimationFrame(frame);
   }
 
   INAV.game = {
