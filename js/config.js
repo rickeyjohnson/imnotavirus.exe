@@ -58,4 +58,11 @@ INAV.config = {
     "Your warranty is expiring. Probably.",
     "A new update is ready. And another.",
   ],
+
+  BUTTONS: [
+    ["OK", "Cancel"],
+    ["Claim", "Later"],
+    ["Fix now", "No"],
+    ["Yes", "Also yes"],
+  ],
 };

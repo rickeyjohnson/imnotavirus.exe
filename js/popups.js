@@ -9,6 +9,10 @@
   const pick = (list) => list[Math.floor(Math.random() * list.length)];
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
+  const X_MARK =
+    '<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">' +
+    '<path d="M2 2l8 8M10 2l-8 8" stroke="var(--paper)" stroke-width="2.6" stroke-linecap="round"/></svg>';
+
   function live() {
     return layer.querySelectorAll(".popup:not(.closing)");
   }
@@ -22,15 +26,19 @@
     el.style.height = h + "px";
     el.style.zIndex = ++z;
 
-    const bar = document.createElement("div");
-    bar.className = "popup-bar";
-    bar.textContent = title;
+    el.innerHTML =
+      '<div class="popup-bar"><span class="popup-title"></span><span class="popup-x">' + X_MARK + "</span></div>" +
+      '<div class="popup-body"><span class="popup-icon">!</span><span class="popup-text"></span></div>' +
+      '<div class="popup-foot"><span class="popup-fake"></span><span class="popup-fake primary"></span></div>';
 
-    const body = document.createElement("div");
-    body.className = "popup-body";
-    body.textContent = message;
+    el.querySelector(".popup-title").textContent = title;
+    el.querySelector(".popup-text").textContent = message;
 
-    el.append(bar, body);
+    const [primary, secondary] = pick(C.BUTTONS);
+    const fakes = el.querySelectorAll(".popup-fake");
+    fakes[0].textContent = secondary;
+    fakes[1].textContent = primary;
+
     layer.appendChild(el);
     return el;
   }
