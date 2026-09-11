@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>imnotavirus.exe</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/desktop.css">
+</head>
+<body>
+  <div id="stage">
+    <div id="icon-column">
+      <div class="icon-placeholder">Recycle Bin</div>
+    </div>
+
+    <div id="taskbar">
+      <span class="hud-start">start</span>
+      <span>Closed <strong id="hud-closed">0</strong></span>
+      <span>Open <strong id="hud-open">0</strong>/<span id="hud-cap">12</span></span>
+      <span class="hud-av">
+        Antivirus
+        <span class="hud-meter"><span class="hud-meter-fill" id="hud-fill"></span></span>
+        <strong id="hud-time">60s</strong>
+      </span>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/stage.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

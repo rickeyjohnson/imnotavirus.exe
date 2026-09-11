@@ -1,0 +1,45 @@
+window.INAV = window.INAV || {};
+
+INAV.config = {
+  STAGE_W: 1280,
+  STAGE_H: 720,
+  TASKBAR_H: 56,
+
+  CAP: 12,
+  ROUND_SECONDS: 60,
+
+  FIRST_SPAWN_MS: 600,
+  INTERVAL_START_MS: 1100,
+  INTERVAL_END_MS: 360,
+  INTERVAL_CURVE: 1.15,
+  MAX_DT_MS: 100,
+
+  BLOOM_CHANCE: 0.45,
+  BLOOM_OFFSET: { x: 150, y: 110 },
+
+  POPUP_W: { min: 240, max: 300 },
+  POPUP_H: { min: 140, max: 160 },
+  SAFE: { left: 130, top: 16, right: 16, bottom: 16 },
+
+  CLOSE_ANIM_MS: 100,
+
+  WARN_AT: 7,
+  CRIT_AT: 10,
+
+  TITLES: [
+    "WARNING.exe", "FreeRAM_Download", "YOU_WON!!!.exe", "System Alert", "toolbar_setup.exe",
+    "Congratulations!", "hot_deals.exe", "PC_Cleaner_Pro", "Update Required", "definitely_safe.zip",
+  ],
+  MESSAGES: [
+    "Your PC is running SLOW! Click to fix now.",
+    "You are visitor #1,000,000! Claim your prize.",
+    "Download 16GB more RAM for free!",
+    "3 viruses found. Install cleaner?",
+    "Your toolbar is out of date.",
+    "Limited offer: 99% off a new mouse!",
+    "Warning: low disk vibes detected.",
+    "Allow notifications? (you have no choice)",
+    "Your warranty is expiring. Probably.",
+    "A new update is ready. And another.",
+  ],
+};
