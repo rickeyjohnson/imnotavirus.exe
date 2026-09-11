@@ -17,21 +17,46 @@
 
     <div id="popups"></div>
 
-    <section data-screen="start">
-      <div class="panel">
-        <h1>imnotavirus.exe</h1>
-        <p>Grey-box build. Close pop-ups for 60 seconds. 12 open = crash.</p>
-        <button class="temp-btn" id="start-btn">click to start</button>
+    <section data-screen="title" hidden>
+      <div class="ghosts" aria-hidden="true">
+        <div class="ghost" style="left:180px;top:60px;width:220px;height:130px"><div class="popup-bar">popup</div><div class="popup-body">popup</div></div>
+        <div class="ghost" style="left:930px;top:50px;width:240px;height:130px"><div class="popup-bar">popup</div><div class="popup-body">popup</div></div>
+        <div class="ghost" style="left:560px;top:24px;width:210px;height:120px"><div class="popup-bar">popup</div><div class="popup-body">popup</div></div>
+        <div class="ghost" style="left:170px;top:450px;width:210px;height:130px"><div class="popup-bar">popup</div><div class="popup-body">popup</div></div>
+        <div class="ghost" style="left:900px;top:440px;width:240px;height:130px"><div class="popup-bar">popup</div><div class="popup-body">popup</div></div>
+      </div>
+      <div class="center">
+        <h1 class="title-logo">imnotavirus<span class="exe">.exe</span></h1>
+        <p class="tagline">Your antivirus needs <span class="copy-seconds">60</span> seconds. The pop-ups need less.</p>
+        <button class="btn" id="start-btn" type="button">start</button>
+        <div class="stats">
+          <span>Score: <strong id="title-last">0</strong></span>
+          <span>Best: <strong id="title-best">0</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <section data-screen="tutorial" hidden>
+      <div class="instruct">
+        <b>Click anywhere on a pop-up</b> to close it. If <b class="copy-cap">12</b> are open at once, your PC crashes.
+        Survive <b><span class="copy-seconds">60</span> seconds</b> while the antivirus installs. Close the practice pop-up to begin.
       </div>
     </section>
 
     <section data-screen="play" hidden></section>
 
-    <section data-screen="end" hidden>
-      <div class="panel">
-        <h1 id="end-title">CRASHED</h1>
-        <p id="end-detail"></p>
-        <button class="temp-btn" id="restart-btn">restart</button>
+    <section data-screen="success" hidden>
+      <div class="dialog" role="dialog" aria-labelledby="success-heading">
+        <div class="dialog-bar">antivirus.exe — Setup</div>
+        <div class="dialog-body">
+          <h2 id="success-heading">Installation complete.<br>Your PC survived.</h2>
+          <span class="badge" id="success-new-best" hidden>New best</span>
+          <div class="stats">
+            <span>Score: <strong id="success-score">0</strong></span>
+            <span>Best: <strong id="success-best">0</strong></span>
+          </div>
+          <button class="btn" id="play-again-btn" type="button">play again</button>
+        </div>
       </div>
     </section>
 
@@ -40,11 +65,20 @@
       <span>Closed <strong id="hud-closed">0</strong></span>
       <span>Open <strong id="hud-open">0</strong>/<span id="hud-cap">12</span></span>
       <span class="hud-av">
-        Antivirus
+        <span id="hud-label">Antivirus: not installed</span>
         <span class="hud-meter"><span class="hud-meter-fill" id="hud-fill"></span></span>
         <strong id="hud-time">60s</strong>
       </span>
     </div>
+
+    <section data-screen="crash" hidden>
+      <div class="crash-face">:(</div>
+      <h2>Your PC ran into a problem and needs to restart.</h2>
+      <p><span class="copy-cap">12</span> pop-ups were open at once. You closed <strong id="crash-score">0</strong> before it happened (best: <strong id="crash-best">0</strong>), and the antivirus was <strong id="crash-progress">0</strong>% installed.</p>
+      <span class="badge" id="crash-new-best" hidden>New best</span>
+      <p class="crash-pct"><span id="crash-pct">0</span>% complete</p>
+      <button class="btn" id="try-again-btn" type="button">try again</button>
+    </section>
 
     <pre id="debug" hidden></pre>
   </div>
