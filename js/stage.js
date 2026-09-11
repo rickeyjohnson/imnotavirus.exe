@@ -21,6 +21,10 @@
   INAV.stage = {
     init(el) {
       stageEl = el;
+      const root = document.documentElement.style;
+      root.setProperty("--stage-w", C.STAGE_W + "px");
+      root.setProperty("--stage-h", C.STAGE_H + "px");
+      root.setProperty("--taskbar", C.TASKBAR_H + "px");
       fit();
       window.addEventListener("resize", fit);
     },
