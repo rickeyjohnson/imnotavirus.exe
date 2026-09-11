@@ -7,6 +7,7 @@
     init(debugEl) {
       el = debugEl;
       window.addEventListener("keydown", (e) => {
+        if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
         if ((e.key || "").toLowerCase() !== "d") return;
         visible = !visible;
         el.hidden = !visible;
