@@ -3,11 +3,12 @@
 
   INAV.storage = {
     get(key, fallback) {
+      if (Object.prototype.hasOwnProperty.call(memory, key)) return memory[key];
       try {
         const raw = localStorage.getItem(key);
         if (raw !== null) return JSON.parse(raw);
       } catch (e) {}
-      return key in memory ? memory[key] : fallback;
+      return fallback;
     },
 
     set(key, value) {
