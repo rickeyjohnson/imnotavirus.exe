@@ -154,8 +154,8 @@ assets/
 ```
 
 **How the pieces talk:**
-- `game` owns round state (`t`, `open`, `score`, `nextSpawnIn`). It calls `popups.spawn()` and reads `popups.count()`.
-- `popups` reports closes through a callback, `onClose(isPractice)`, that `game` registers. It never touches screens or the HUD directly.
+- `game` owns round state (`t`, `score`, `nextSpawnIn`). The open count isn't stored anywhere; it comes from `popups.count()`, which excludes pop-ups that are mid-close. `game` calls `popups.spawn()`.
+- `popups` reports closes through a callback, `onClose(el)`, that `game` registers. A practice pop-up is recognized by `el.dataset.practice`. `popups` never touches screens or the HUD directly.
 - `screens.show()` is the only place screen visibility changes. `hud.render(state)` is the only place the taskbar changes.
 - `config` holds no logic. Tuning never requires touching other files.
 
@@ -228,8 +228,8 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 - **What:** click anywhere on a pop-up and it vanishes. Score goes up.
 - **How:** one `pointerdown` listener on the pop-up layer finds the clicked pop-up with `closest('.popup')`. It marks it `.closing` (which blocks double counting), removes it after the animation, and calls `onClose`, so `game` can decrement `open` and increment `score`.
 - **Knobs:** close animation length (in CSS).
-- **Test:** click fast and repeatedly on one pop-up. Score should go up by exactly 1.
-- **Broken:** score jumps by 2, the open count goes negative, or a click passes through to the pop-up behind.
+- **Test:** click fast and repeatedly on one pop-up that nothing overlaps. Score should go up by exactly 1. Where pop-ups overlap, each click closes the topmost pop-up that's still open, so rapid clicks clear a cluster one pop-up per click. That's by design.
+- **Broken:** one non-overlapping pop-up scores 2, the open count goes negative, or a right-click closes a pop-up.
 
 **Crash cap**
 - **What:** if too many pop-ups are open at once, the PC crashes.
@@ -260,6 +260,13 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 ### Iteration 2: Screen flow
 
 **Goal:** the full loop from the sketches. Title → Tutorial → Gameplay → Game Over / Success → back, with persistent last and best scores.
+
+**Carried over from the iteration 1 code review** (the iteration 2 plan must cover these):
+- **One state list:** `game.phase` uses the §4 states (`title, tutorial, play, crashing, crash, success`). `game` owns the timed `crashing` → `crash` transition. `screens` only maps a phase to its visible screen.
+- **Results rendering:** per-screen text (Title stats, Game Over/Success results, the "New best" badge) moves into `screens` enter logic, so `main.js` only wires events.
+- **Spawn options:** `popups.spawn(opts)` accepts at least a fixed position and a practice flag, for the centered practice pop-up.
+- **Clean screens:** pop-ups are cleared when leaving gameplay (Success and Title show a clean desktop), and the HUD shows zeroed values on Title.
+- **Copy from config:** screen text that mentions numbers (60 seconds, 12 open) reads them from `INAV.config`.
 
 **Questions for Rickey**
 1. **Tutorial frequency:** show the tutorial on every Start, as decided, or only the first time you ever play?
