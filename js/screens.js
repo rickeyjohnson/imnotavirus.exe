@@ -4,6 +4,7 @@
     title: "title",
     tutorial: "tutorial",
     play: "play",
+    paused: "paused",
     crashing: "play",
     crash: "crash",
     success: "success",
@@ -23,6 +24,10 @@
     $("title-last").textContent = INAV.storage.get(C.STORAGE_KEYS.last, 0);
     $("title-best").textContent = INAV.storage.get(C.STORAGE_KEYS.best, 0);
     $("start-btn").focus();
+  }
+
+  function enterPaused() {
+    $("resume-btn").focus();
   }
 
   function enterCrash(s) {
@@ -53,6 +58,7 @@
 
   const ENTER = {
     title: enterTitle,
+    paused: enterPaused,
     crash: enterCrash,
     success: enterSuccess,
   };

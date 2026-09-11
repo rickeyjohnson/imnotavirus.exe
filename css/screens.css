@@ -187,3 +187,13 @@
 .crash-pct {
   font-variant-numeric: tabular-nums;
 }
+
+[data-screen="paused"] {
+  background: rgba(39, 53, 72, 0.35);
+}
+
+.dialog-body p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+}

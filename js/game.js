@@ -68,6 +68,16 @@
     setPhase("play");
   }
 
+  function togglePause() {
+    if (state.phase === "play") {
+      INAV.popups.setEnabled(false);
+      setPhase("paused");
+    } else if (state.phase === "paused") {
+      INAV.popups.setEnabled(true);
+      setPhase("play");
+    }
+  }
+
   function recordResult(won) {
     const previousBest = INAV.storage.get(C.STORAGE_KEYS.best, 0);
     const isBest = state.score > previousBest;
@@ -149,6 +159,7 @@
     },
     goTitle,
     startTutorial,
+    togglePause,
     handleClose,
     snapshot,
     interval,

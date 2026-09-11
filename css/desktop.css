@@ -42,8 +42,21 @@
   align-items: center;
   padding: 0 20px;
   background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  font: inherit;
   font-weight: 700;
   font-style: italic;
+  cursor: pointer;
+}
+
+.hud-start:hover {
+  color: var(--warn);
+}
+
+.hud-start:focus-visible {
+  outline: 3px solid var(--warn);
+  outline-offset: -3px;
 }
 
 .hud-av {

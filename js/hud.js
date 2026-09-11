@@ -4,6 +4,7 @@
     title: "Antivirus: not installed",
     tutorial: "Antivirus: not installed",
     play: "Antivirus installing…",
+    paused: "Antivirus paused",
     crashing: "Antivirus installing…",
     crash: "Antivirus failed",
     success: "Antivirus: protected",
