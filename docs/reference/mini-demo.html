@@ -1,0 +1,573 @@
+<title>imnotavirus.exe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Rubik:wght@400;500;700&display=swap">
+<style>
+  /* GDD palette — five values, one accent. Single committed look (no dark theme). */
+  :root {
+    --desk: #00CAFF;   /* background */
+    --paper: #FFFFFF;  /* pop-up body */
+    --warn: #FAF900;   /* warning */
+    --err: #FF0057;    /* error / X button */
+    --ink: #273548;    /* outlines, text, downloading pop-ups */
+    --blue: #0078FD;   /* accent: title bars, taskbar */
+    --line: 3px;
+    --radius: 12px;
+    --taskbar: 56px;
+    --display: "Fredoka", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+    --ui: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; overflow: hidden;
+    background: var(--ink); color: var(--ink);
+    font-family: var(--ui);
+    -webkit-font-smoothing: antialiased;
+    user-select: none; -webkit-user-select: none;
+  }
+
+  /* Fixed 1280x720 stage, scaled to fit — pop-up coords never depend on window size */
+  #stage {
+    position: absolute; left: 50%; top: 50%;
+    width: 1280px; height: 720px;
+    transform: translate(-50%, -50%) scale(var(--s, 1));
+    background: var(--desk);
+    overflow: hidden;
+  }
+  #stage.shake { animation: shake .35s linear; }
+  @keyframes shake {
+    0%,100% { transform: translate(-50%,-50%) scale(var(--s,1)); }
+    20% { transform: translate(calc(-50% - 8px), calc(-50% + 4px)) scale(var(--s,1)); }
+    40% { transform: translate(calc(-50% + 7px), calc(-50% - 5px)) scale(var(--s,1)); }
+    60% { transform: translate(calc(-50% - 5px), calc(-50% + 6px)) scale(var(--s,1)); }
+    80% { transform: translate(calc(-50% + 4px), calc(-50% - 3px)) scale(var(--s,1)); }
+  }
+
+  /* ---------- desktop icons ---------- */
+  #icons {
+    position: absolute; left: 20px; top: 20px;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  .icon { width: 88px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .icon span {
+    font: 500 13px/1.15 var(--ui); color: var(--ink); text-align: center;
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 6px; padding: 2px 6px;
+  }
+
+  /* ---------- windows (anchor asset) ---------- */
+  #popups { position: absolute; inset: 0 0 var(--taskbar) 0; }
+  .win {
+    position: absolute;
+    background: var(--paper);
+    border: var(--line) solid var(--ink);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .win .bar {
+    flex: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    height: 38px; padding: 0 6px 0 12px;
+    background: var(--blue); color: var(--paper);
+    border-bottom: var(--line) solid var(--ink);
+    font: 600 15px/1 var(--display); letter-spacing: .01em;
+  }
+  .win .ttl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .win .x {
+    flex: none; width: 26px; height: 26px;
+    display: grid; place-items: center;
+    background: var(--err); border: 2px solid var(--ink); border-radius: 7px;
+  }
+  .win .body { flex: 1; display: flex; align-items: center; gap: 12px; padding: 10px 14px 4px; min-height: 0; }
+  .win .ico {
+    flex: none; width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--warn); border: var(--line) solid var(--ink);
+    font: 700 22px/1 var(--display);
+  }
+  .win p { margin: 0; font: 500 15px/1.25 var(--ui); text-wrap: pretty; }
+  .win .foot { flex: none; display: flex; justify-content: flex-end; gap: 8px; padding: 0 12px 10px; }
+  .win .fake {
+    font: 600 13px/1 var(--display); padding: 6px 14px;
+    border: 2px solid var(--ink); border-radius: 8px; background: var(--paper);
+  }
+  .win .fake.primary { background: var(--warn); }
+
+  .popup { cursor: pointer; animation: pop-in .16s cubic-bezier(.2, 1.5, .45, 1) both; }
+  .popup:hover .bar { background: var(--ink); }
+  .popup.closing { animation: pop-out .1s ease-in forwards; pointer-events: none; }
+  @keyframes pop-in { from { transform: scale(.55); opacity: 0; } }
+  @keyframes pop-out { to { transform: scale(.7); opacity: 0; } }
+
+  .ghost { opacity: .32; pointer-events: none; }
+  .ghost p { font-weight: 700; letter-spacing: .02em; }
+
+  /* ---------- screens ---------- */
+  .screen { position: absolute; inset: 0 0 var(--taskbar) 0; }
+  .center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px; text-align: center;
+  }
+  .logo-title {
+    margin: 0;
+    font: 700 108px/0.95 var(--display); letter-spacing: -.02em;
+    color: var(--ink);
+  }
+  .logo-title b { color: var(--err); font-weight: 700; }
+  .tagline {
+    margin: 0 0 8px;
+    font: 500 19px/1.3 var(--ui); color: var(--ink);
+    background: var(--paper); border: var(--line) solid var(--ink); border-radius: 999px;
+    padding: 6px 18px;
+  }
+  .stats {
+    display: flex; gap: 10px;
+    font: 500 18px/1 var(--ui); font-variant-numeric: tabular-nums;
+  }
+  .stats span { background: var(--paper); border: 2px solid var(--ink); border-radius: 8px; padding: 7px 12px; }
+  .stats strong { font-weight: 700; }
+
+  .btn {
+    font: 600 32px/1 var(--display); color: var(--ink);
+    padding: 14px 48px;
+    background: var(--paper);
+    border: 4px solid var(--ink); border-radius: 16px;
+    box-shadow: 0 6px 0 var(--ink);
+    cursor: pointer;
+    transition: transform .06s, box-shadow .06s, background .1s;
+  }
+  .btn:hover { background: var(--warn); }
+  .btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--ink); }
+  .btn:focus-visible, .link:focus-visible { outline: 4px solid var(--warn); outline-offset: 4px; }
+  .btn.small { font-size: 24px; padding: 10px 32px; }
+  .link {
+    font: 500 16px/1 var(--ui); color: inherit; background: none; border: 0;
+    text-decoration: underline; text-underline-offset: 4px; cursor: pointer; padding: 6px;
+  }
+
+  .instruct {
+    position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
+    width: 760px; padding: 14px 22px;
+    background: var(--paper); border: var(--line) solid var(--ink); border-radius: var(--radius);
+    font: 500 18px/1.4 var(--ui); text-align: center;
+  }
+  .instruct b { font-weight: 700; }
+  .instruct kbd {
+    font: 600 14px var(--display); background: var(--warn);
+    border: 2px solid var(--ink); border-radius: 6px; padding: 1px 7px;
+  }
+
+  .dialog { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 440px; }
+  .dialog .body { flex-direction: column; align-items: center; gap: 14px; padding: 26px 24px 26px; text-align: center; }
+  .dialog h2 { margin: 0; font: 600 30px/1.1 var(--display); }
+  .dialog .stats { font-size: 20px; }
+  .badge {
+    font: 600 14px/1 var(--display); letter-spacing: .06em; text-transform: uppercase;
+    background: var(--warn); border: 2px solid var(--ink); border-radius: 999px; padding: 6px 12px;
+  }
+
+  /* ---------- taskbar ---------- */
+  #taskbar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: var(--taskbar);
+    display: flex; align-items: center; gap: 10px; padding: 0 10px;
+    background: var(--blue); color: var(--paper);
+    border-top: var(--line) solid var(--ink);
+    z-index: 5000;
+  }
+  .start {
+    display: flex; align-items: center; gap: 9px;
+    height: 40px; padding: 0 18px 0 11px;
+    background: var(--ink); color: var(--paper);
+    border-radius: 0 20px 20px 0; margin-left: -10px;
+    font: 700 21px/1 var(--display); font-style: italic; letter-spacing: .01em;
+  }
+  .flag { display: grid; grid-template-columns: 10px 10px; gap: 2px; transform: skewY(-6deg); }
+  .flag i { width: 10px; height: 10px; border-radius: 2px; }
+  .flag i:nth-child(1) { background: var(--err); }
+  .flag i:nth-child(2) { background: var(--desk); }
+  .flag i:nth-child(3) { background: var(--paper); }
+  .flag i:nth-child(4) { background: var(--warn); }
+
+  .chip {
+    display: flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 12px;
+    background: var(--paper); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 9px;
+    font: 500 15px/1 var(--ui); font-variant-numeric: tabular-nums;
+  }
+  .chip strong { font-weight: 700; }
+  .chip.warn { background: var(--warn); }
+  .chip.crit { background: var(--err); color: var(--paper); animation: blink .5s steps(2) infinite; }
+  @keyframes blink { 50% { background: var(--ink); } }
+
+  .av { margin-left: auto; display: flex; align-items: center; gap: 10px; font: 500 14px/1 var(--ui); }
+  .av .label { white-space: nowrap; }
+  .meter {
+    width: 220px; height: 22px; overflow: hidden;
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 11px;
+  }
+  .meter i {
+    display: block; height: 100%; width: 0%;
+    background: repeating-linear-gradient(-45deg, var(--ink) 0 6px, var(--warn) 6px 12px);
+    border-right: 2px solid var(--ink);
+  }
+  .av .secs { width: 38px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .clock {
+    height: 40px; display: flex; align-items: center; padding: 0 14px;
+    border-left: 2px solid var(--ink); font: 500 15px/1 var(--ui); font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- crash (game over) ---------- */
+  #crash {
+    position: absolute; inset: 0; z-index: 9000;
+    background: var(--blue); color: var(--paper);
+    padding: 90px 150px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 22px;
+  }
+  #crash .face { font: 500 170px/0.8 var(--display); margin: 0 0 12px; }
+  #crash h2 { margin: 0; font: 400 34px/1.3 var(--ui); max-width: 30ch; text-wrap: balance; }
+  #crash p { margin: 0; font: 400 20px/1.4 var(--ui); max-width: 60ch; }
+  #crash .pct { font-variant-numeric: tabular-nums; }
+  #crash .row { display: flex; align-items: center; gap: 24px; margin-top: 10px; }
+  #crash .btn { box-shadow: 0 6px 0 var(--ink); }
+
+  /* ---------- debug ---------- */
+  #debug {
+    position: absolute; right: 12px; top: 12px; z-index: 8000;
+    font: 500 12px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--ink); color: var(--paper); padding: 8px 10px; border-radius: 8px;
+    white-space: pre;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .popup, .popup.closing, #stage.shake, .chip.crit { animation: none !important; }
+  }
+</style>
+
+<div id="stage">
+  <div id="icons" aria-hidden="true">
+    <div class="icon">
+      <svg viewBox="0 0 56 56" width="56" height="56">
+        <path d="M23 7h10" stroke="#273548" stroke-width="3" stroke-linecap="round"/>
+        <rect x="9" y="11" width="38" height="8" rx="3" fill="#FFFFFF" stroke="#273548" stroke-width="3"/>
+        <path d="M13 19h30l-3 29a4 4 0 0 1-4 3.5H20a4 4 0 0 1-4-3.5z" fill="#FFFFFF" stroke="#273548" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M23 26v18M33 26v18" stroke="#273548" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <span>Recycle Bin</span>
+    </div>
+    <div class="icon">
+      <svg viewBox="0 0 56 56" width="56" height="56">
+        <path d="M28 5l19 7v14c0 13-8 21-19 26C17 47 9 39 9 26V12z" fill="#0078FD" stroke="#273548" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M19 28l7 7 12-13" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>antivirus.exe</span>
+    </div>
+  </div>
+
+  <div id="popups"></div>
+
+  <!-- TITLE -->
+  <section class="screen" data-screen="title">
+    <div class="ghosts" aria-hidden="true"></div>
+    <div class="center">
+      <h1 class="logo-title">imnotavirus<b>.exe</b></h1>
+      <p class="tagline">Your antivirus needs 60 seconds. The pop-ups need less.</p>
+      <button class="btn" id="startBtn">start</button>
+      <div class="stats">
+        <span>Score: <strong id="tLast">0</strong></span>
+        <span>Best: <strong id="tBest">0</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TUTORIAL -->
+  <section class="screen" data-screen="tutorial" hidden>
+    <div class="instruct">
+      <b>Click anywhere on a pop-up</b> to close it. If <b>12</b> are open at once, your PC crashes.
+      Survive <b>60 seconds</b> while the antivirus installs. Close the practice pop-up to begin.
+    </div>
+  </section>
+
+  <!-- GAMEPLAY -->
+  <section class="screen" data-screen="play" hidden></section>
+
+  <!-- SUCCESS -->
+  <section class="screen" data-screen="success" hidden>
+    <div class="win dialog" role="dialog" aria-labelledby="sTitle">
+      <div class="bar"><span class="ttl">antivirus.exe — Setup</span></div>
+      <div class="body">
+        <h2 id="sTitle">Installation complete.<br>Your PC survived.</h2>
+        <span class="badge" id="sNew" hidden>New best</span>
+        <div class="stats">
+          <span>Score: <strong id="sScore">0</strong></span>
+          <span>Best: <strong id="sBest">0</strong></span>
+        </div>
+        <button class="btn small" id="againBtn">play again</button>
+        <button class="link" data-go="title">Back to desktop</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TASKBAR -->
+  <div id="taskbar">
+    <div class="start" aria-hidden="true"><span class="flag"><i></i><i></i><i></i><i></i></span>start</div>
+    <div class="chip" id="chipScore">Closed <strong id="hScore">0</strong></div>
+    <div class="chip" id="chipOpen">Open <strong id="hOpen">0</strong>/12</div>
+    <div class="av">
+      <span class="label" id="avLabel">Antivirus: not installed</span>
+      <div class="meter" role="progressbar" aria-label="Antivirus install progress"><i id="avFill"></i></div>
+      <span class="secs" id="avSecs">60s</span>
+    </div>
+    <div class="clock" id="clock">12:00 PM</div>
+  </div>
+
+  <!-- GAME OVER -->
+  <section id="crash" hidden>
+    <div class="face">:(</div>
+    <h2>Your PC ran into a problem and needs to restart.</h2>
+    <p>Twelve pop-ups were open at once. You closed <strong id="cScore">0</strong> before it happened (best: <strong id="cBest">0</strong>), and the antivirus was <strong id="cSurvived">0</strong>% installed.</p>
+    <p class="pct"><span id="cPct">0</span>% complete</p>
+    <div class="row">
+      <button class="btn small" id="retryBtn">try again</button>
+      <button class="link" data-go="title">Back to desktop</button>
+    </div>
+  </section>
+
+  <div id="debug" hidden></div>
+</div>
+
+<script>
+(() => {
+  // ---------- config (tuning knobs) ----------
+  const W = 1280, H = 720 - 56;          // playable area above the taskbar
+  const CAP = 12;                          // open pop-ups that crash the PC
+  const ROUND = 60;                        // seconds the antivirus takes
+  const FIRST_SPAWN = 600;                 // ms — "within the first second"
+  const INTERVAL_START = 1100;             // ms between spawns at 0:00
+  const INTERVAL_END = 360;                // ms between spawns at 0:60
+  const BLOOM_CHANCE = 0.45;               // spawn next to an existing pop-up
+  const SAFE = { left: 130, top: 16, right: 16, bottom: 16 };
+
+  const TITLES = ["WARNING.exe", "FreeRAM_Download", "YOU_WON!!!.exe", "System Alert", "toolbar_setup.exe",
+    "Congratulations!", "hot_deals.exe", "PC_Cleaner_Pro", "Update Required", "definitely_safe.zip"];
+  const MSGS = ["Your PC is running SLOW! Click to fix now.", "You are visitor #1,000,000! Claim your prize.",
+    "Download 16GB more RAM for free!", "3 viruses found. Install cleaner?", "Your toolbar is out of date.",
+    "Limited offer: 99% off a new mouse!", "Warning: low disk vibes detected.", "Allow notifications? (you have no choice)",
+    "Your warranty is expiring. Probably.", "A new update is ready. And another."];
+  const BUTTONS = [["OK", "Cancel"], ["Claim", "Later"], ["Fix now", "No"], ["Yes", "Also yes"]];
+  const X_SVG = '<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/></svg>';
+
+  // ---------- helpers ----------
+  const $ = (s) => document.querySelector(s);
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  };
+
+  const stage = $("#stage"), layer = $("#popups");
+
+  function fit() {
+    const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.setProperty("--s", s);
+  }
+  window.addEventListener("resize", fit);
+  fit();
+
+  // ---------- state ----------
+  let screen = "title";
+  let t = 0, acc = 0, nextIn = FIRST_SPAWN, open = 0, score = 0, z = 10;
+  let last = 0, best = store.get("inav.best", 0), lastScore = store.get("inav.last", 0);
+  let debug = false;
+
+  function interval(t) {
+    const p = clamp(t / ROUND, 0, 1);
+    return INTERVAL_START - (INTERVAL_START - INTERVAL_END) * Math.pow(p, 1.15);
+  }
+
+  // ---------- pop-ups ----------
+  function makeWindow({ title, msg, x, y, w, h, cls = "popup" }) {
+    const el = document.createElement("div");
+    el.className = "win " + cls;
+    el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${++z}`;
+    const [b1, b2] = pick(BUTTONS);
+    el.innerHTML = `<div class="bar"><span class="ttl"></span><span class="x">${X_SVG}</span></div>
+      <div class="body"><div class="ico">!</div><p></p></div>
+      <div class="foot"><span class="fake">${b2}</span><span class="fake primary">${b1}</span></div>`;
+    el.querySelector(".ttl").textContent = title;
+    el.querySelector("p").textContent = msg;
+    return el;
+  }
+
+  function spawn() {
+    const w = Math.round(rand(240, 300)), h = Math.round(rand(140, 160));
+    const minX = SAFE.left, maxX = W - w - SAFE.right, minY = SAFE.top, maxY = H - h - SAFE.bottom;
+    let x = rand(minX, maxX), y = rand(minY, maxY);
+    const live = layer.querySelectorAll(".popup:not(.closing)");
+    if (live.length && Math.random() < BLOOM_CHANCE) {        // bloom: grow out of an existing infection
+      const src = pick(live);
+      x = parseFloat(src.style.left) + rand(-150, 150);
+      y = parseFloat(src.style.top) + rand(-110, 110);
+    }
+    x = Math.round(clamp(x, minX, maxX)); y = Math.round(clamp(y, minY, maxY));
+    layer.appendChild(makeWindow({ title: pick(TITLES), msg: pick(MSGS), x, y, w, h }));
+    open++;
+  }
+
+  function clearPopups() { layer.innerHTML = ""; open = 0; }
+
+  layer.addEventListener("pointerdown", (e) => {
+    const p = e.target.closest(".popup");
+    if (!p || p.classList.contains("closing")) return;
+    p.classList.add("closing");
+    setTimeout(() => p.remove(), 100);
+    if (p.dataset.practice) { setTimeout(startRound, 250); return; }
+    if (screen !== "play") return;
+    open--; score++;
+    renderHud();
+  });
+
+  // ---------- screens ----------
+  function show(name) {
+    screen = name;
+    document.querySelectorAll(".screen").forEach((el) => { el.hidden = el.dataset.screen !== name; });
+    $("#crash").hidden = name !== "crash";
+    renderHud();
+  }
+
+  function goTitle() {
+    clearPopups();
+    $("#tLast").textContent = lastScore;
+    $("#tBest").textContent = best;
+    t = 0;
+    show("title");
+    $("#startBtn").focus({ preventScroll: true });
+  }
+
+  function startTutorial() {
+    clearPopups(); t = 0; score = 0;
+    const w = 330, h = 170;
+    const el = makeWindow({ title: "practice_popup.exe", msg: "Click anywhere on me to close me. That's the whole trick.",
+      x: (W - w) / 2, y: 150, w, h });
+    el.dataset.practice = "1";
+    layer.appendChild(el);
+    show("tutorial");
+  }
+
+  function startRound() {
+    clearPopups();
+    t = 0; acc = 0; nextIn = FIRST_SPAWN; open = 0; score = 0;
+    show("play");
+  }
+
+  function saveScore() {
+    lastScore = score;
+    const isBest = score > best;
+    if (isBest) best = score;
+    store.set("inav.last", lastScore);
+    store.set("inav.best", best);
+    return isBest;
+  }
+
+  function crash() {
+    screen = "crashing";
+    const isBest = saveScore();
+    stage.classList.remove("shake"); void stage.offsetWidth; stage.classList.add("shake");
+    setTimeout(() => {
+      clearPopups();
+      $("#cScore").textContent = score;
+      $("#cBest").textContent = best + (isBest && score > 0 ? " — new!" : "");
+      $("#cSurvived").textContent = Math.floor((t / ROUND) * 100);
+      show("crash");
+      $("#retryBtn").focus({ preventScroll: true });
+      let pct = 0;
+      const tick = setInterval(() => {
+        pct = Math.min(100, pct + Math.ceil(Math.random() * 9));
+        $("#cPct").textContent = pct;
+        if (pct >= 100 || screen !== "crash") clearInterval(tick);
+      }, 90);
+      $("#cPct").textContent = 0;
+    }, 420);
+  }
+
+  function win() {
+    const isBest = saveScore();
+    clearPopups();
+    t = ROUND;
+    $("#sScore").textContent = score;
+    $("#sBest").textContent = best;
+    $("#sNew").hidden = !isBest;
+    show("success");
+    $("#againBtn").focus({ preventScroll: true });
+  }
+
+  // ---------- HUD ----------
+  function renderHud() {
+    $("#hScore").textContent = score;
+    $("#hOpen").textContent = open;
+    const chip = $("#chipOpen");
+    chip.classList.toggle("warn", open >= 7 && open < 10);
+    chip.classList.toggle("crit", open >= 10);
+
+    const installing = screen === "play" || screen === "crashing";
+    const done = screen === "success";
+    const pct = done ? 100 : installing ? (t / ROUND) * 100 : 0;
+    $("#avFill").style.width = pct + "%";
+    $("#avLabel").textContent = done ? "Antivirus: protected" : installing ? "Antivirus installing…" : "Antivirus: not installed";
+    $("#avSecs").textContent = installing ? Math.ceil(ROUND - t) + "s" : done ? "✓" : "60s";
+
+    if (debug) {
+      $("#debug").textContent =
+        `t        ${t.toFixed(1)}s\ninterval ${Math.round(interval(t))}ms\nopen     ${open}/${CAP}\nclosed   ${score}\nscreen   ${screen}`;
+    }
+  }
+
+  function clock() {
+    $("#clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+  setInterval(clock, 10000); clock();
+
+  // ---------- main loop ----------
+  function frame(now) {
+    const dt = Math.min(now - (last || now), 100);   // clamp so a background tab can't dump a burst
+    last = now;
+    if (screen === "play") {
+      t += dt / 1000;
+      acc += dt;
+      while (acc >= nextIn && screen === "play") {
+        acc -= nextIn;
+        spawn();
+        nextIn = interval(t);
+        if (open >= CAP) { crash(); break; }
+      }
+      if (screen === "play" && t >= ROUND) win();
+      renderHud();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ---------- title ghosts ----------
+  const ghosts = document.querySelector(".ghosts");
+  [[180, 60, 220], [930, 50, 240], [560, 24, 210], [170, 450, 210], [900, 440, 240]].forEach(([x, y, w]) => {
+    const g = makeWindow({ title: "popup", msg: "popup", x, y, w, h: 130, cls: "ghost" });
+    g.style.zIndex = 0;
+    ghosts.appendChild(g);
+  });
+
+  // ---------- wiring ----------
+  $("#startBtn").addEventListener("click", startTutorial);
+  $("#retryBtn").addEventListener("click", startRound);
+  $("#againBtn").addEventListener("click", startRound);
+  document.querySelectorAll("[data-go=title]").forEach((b) => b.addEventListener("click", goTitle));
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "d" || e.key === "D") { debug = !debug; $("#debug").hidden = !debug; renderHud(); }
+  });
+
+  goTitle();
+})();
+</script>
