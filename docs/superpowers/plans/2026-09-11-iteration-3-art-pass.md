@@ -403,7 +403,7 @@ git commit -m "feat: style the anchor pop-up window"
 ### Task 3: Desktop icons and taskbar
 
 **Files:**
-- Modify: `index.html`, `js/hud.js`
+- Modify: `index.html`, `js/hud.js`, `js/config.js`, `css/base.css`, `css/window.css`
 - Rewrite: `css/desktop.css`
 
 **Interfaces:**
@@ -411,6 +411,18 @@ git commit -m "feat: style the anchor pop-up window"
 - New ids: `hud-start-label`, `hud-clock`.
 - `INAV.hud.render(s)` also sets the start button's label ("start" / "resume"), its `title`, and `aria-pressed`.
 - `INAV.hud.init()` also starts the clock.
+
+- [ ] **Step 0: Add the thin-border token (carried from the Task 2 review)**
+
+The pop-up's inner details use a deliberately thinner border than the window edge, but it was hard-coded. Make it a token.
+
+In `css/base.css`, add this line directly after the line `  --line: 3px;`:
+
+```css
+  --line-thin: 2px;
+```
+
+In `css/window.css`, in the `.popup-x` rule replace `border: 2px solid var(--ink);` with `border: var(--line-thin) solid var(--ink);`, and do the same in the `.popup-fake` rule. Those are the only two raw `2px` borders in that file.
 
 - [ ] **Step 1: Icons and taskbar markup in `index.html`**
 
@@ -483,7 +495,7 @@ Replace the whole `<div id="taskbar"> ... </div>` block with:
 .desktop-icon span {
   padding: 2px 8px;
   background: var(--paper);
-  border: 2px solid var(--ink);
+  border: var(--line-thin) solid var(--ink);
   border-radius: calc(var(--radius) / 2);
   font-size: 12px;
   font-weight: 500;
@@ -560,7 +572,7 @@ Replace the whole `<div id="taskbar"> ... </div>` block with:
   padding: 0 12px;
   background: var(--paper);
   color: var(--ink);
-  border: 2px solid var(--ink);
+  border: var(--line-thin) solid var(--ink);
   border-radius: calc(var(--radius) / 1.5);
 }
 
@@ -577,7 +589,7 @@ Replace the whole `<div id="taskbar"> ... </div>` block with:
   height: 22px;
   overflow: hidden;
   background: var(--paper);
-  border: 2px solid var(--ink);
+  border: var(--line-thin) solid var(--ink);
   border-radius: 11px;
 }
 
@@ -599,7 +611,7 @@ Replace the whole `<div id="taskbar"> ... </div>` block with:
   display: flex;
   align-items: center;
   padding: 0 14px;
-  border-left: 2px solid var(--ink);
+  border-left: var(--line-thin) solid var(--ink);
   font-size: 14px;
 }
 ```
@@ -674,7 +686,7 @@ Manual (controller): the desktop shows two icons with labels; the taskbar shows 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add index.html css/desktop.css js/hud.js js/config.js
+git add index.html css/desktop.css js/hud.js js/config.js css/base.css css/window.css
 git commit -m "feat: draw desktop icons and the XP-parody taskbar"
 ```
 
@@ -767,7 +779,7 @@ git commit -m "feat: draw desktop icons and the XP-parody taskbar"
 .stats span {
   padding: 7px 14px;
   background: var(--paper);
-  border: 2px solid var(--ink);
+  border: var(--line-thin) solid var(--ink);
   border-radius: calc(var(--radius) / 1.5);
 }
 
@@ -868,7 +880,7 @@ git commit -m "feat: draw desktop icons and the XP-parody taskbar"
   padding: 5px 14px;
   background: var(--warn);
   color: var(--ink);
-  border: 2px solid var(--ink);
+  border: var(--line-thin) solid var(--ink);
   border-radius: 999px;
   font-family: var(--display);
   font-size: 13px;
