@@ -8,8 +8,15 @@
   display: none;
 }
 
-[data-screen="play"] {
+[data-screen] {
   pointer-events: none;
+}
+
+[data-screen] button,
+.dialog,
+[data-screen="paused"],
+[data-screen="crash"] {
+  pointer-events: auto;
 }
 
 .center {

@@ -38,6 +38,7 @@
     state.score = 0;
     state.spawnAcc = 0;
     state.nextSpawnIn = C.FIRST_SPAWN_MS;
+    state.result = null;
   }
 
   function goTitle() {

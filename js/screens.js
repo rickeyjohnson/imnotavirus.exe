@@ -11,10 +11,11 @@
   };
   const $ = (id) => document.getElementById(id);
   let pctTimer = null;
+  let lockTimer = null;
 
   function lockButton(btn) {
     btn.disabled = true;
-    setTimeout(() => {
+    lockTimer = setTimeout(() => {
       btn.disabled = false;
       btn.focus();
     }, C.END_LOCKOUT_MS);
@@ -75,6 +76,9 @@
 
     show(phase, s) {
       clearInterval(pctTimer);
+      clearTimeout(lockTimer);
+      pctTimer = null;
+      lockTimer = null;
       const name = SCREEN_FOR_PHASE[phase];
       document.querySelectorAll("[data-screen]").forEach((el) => {
         el.hidden = el.dataset.screen !== name;
