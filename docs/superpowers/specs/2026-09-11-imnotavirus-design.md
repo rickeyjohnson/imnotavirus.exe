@@ -17,7 +17,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 
 - **Only HTML, CSS and vanilla JavaScript.** No libraries, frameworks, build tools or package managers.
 - **Opens by double-clicking `index.html`.** No server required. This means classic `<script>` tags, not ES modules, because modules fail over `file://`.
-- **Manual testing only.** No unit tests. Every iteration ends with a manual test checklist (see §10).
+- **Manual testing only.** No unit tests. Every iteration ends with a manual test checklist (see §9).
 - **Fonts:** a system font stack until iteration 3. Any custom font ships as a local file in `assets/fonts/` (it counts as an asset, not a library), with a system fallback.
 
 ## 3. Decisions log
@@ -32,6 +32,10 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Retry | "try again" / "play again" go **straight to Gameplay** | Skips the tutorial for fast replay. "Back to desktop" goes to Title |
 | Pop-up variety | **One type in V1**; variety in iteration 5 | Warning / error / downloading types come later |
 | Window resizing | Fixed 1280×720 stage, scaled to fit, letterboxed | Resolves GDD fragile items #1 and #3 |
+| Code authorship (iter 1 Q1) | Claude writes the code with **minimal comments** | The mechanics guide (§9) does the explaining |
+| Starting difficulty (iter 1 Q2) | Keep `CAP = 12` and the 1100 → 360 ms ramp | Real tuning happens in iteration 4 |
+| Round start (iter 1 Q3) | Temporary "click to start" button plus a plain-text end state with "restart" | Replaced by real screens in iteration 2 |
+| Pop-up copy (iter 1 Q4) | Demo placeholder joke copy, kept in `config.js` | Rickey can replace it any time |
 
 ## 4. Screens and flow
 
@@ -97,6 +101,9 @@ If storage is unavailable, the game still plays with the values held in memory.
 | `INTERVAL_END_MS` | 360 | Peak density at 0:55 |
 | `INTERVAL_CURVE` | 1.15 | Ramp shape |
 | `BLOOM_CHANCE` | 0.45 | Visible spreading |
+| `BLOOM_OFFSET` | ±150 px x, ±110 px y | Cluster tightness |
+| `SAFE` | left 130, top/right/bottom 16 px | Always clickable and visible |
+| `WARN_AT` / `CRIT_AT` | 7 / 10 open | Danger feedback (iteration 4) |
 | `POPUP_W` / `POPUP_H` | 240–300 / 140–160 px | Large enough to click, small enough to take up little screen |
 
 Target feel from the GDD: by 0:30 pop-ups arrive noticeably faster; at 0:55 a skilled player is holding steady and a losing player sits 1–2 spawns from the cap. Tuning happens mainly in iteration 4.
@@ -165,36 +172,226 @@ assets/
 
 ## 9. Iteration roadmap
 
-Each iteration is a playable checkpoint. After each one: manual test, then feedback, assets and rule changes from Rickey, and the spec/plan is updated before the next.
+Each iteration is a playable checkpoint, and every one runs the same cycle:
 
-1. **Grey-box core loop.** File structure from §7. Plain boxes on the desktop color, spawning with the ramp and bloom, click to close, score, open counter, 60 s timer, crash at the cap, success at 60 s. End states can be plain text. Debug overlay (D key).
-2. **Screen flow.** Title → Tutorial → Gameplay → Game Over / Success → back. Last and best scores persisted. Retry skips the tutorial.
-3. **Art pass.** The finished anchor pop-up, desktop icons (recycle bin, antivirus), taskbar with start logo, striped antivirus progress bar, clock, ghost pop-ups on Title, crash screen, success dialog. Any custom fonts go in local files.
-4. **Tuning and feel.** Tune the ramp against the 0:00 / 0:30 / 0:55 beats. Danger feedback as the cap nears (counter goes yellow at 7, red and blinking at 10; possible screen shake). Open/close animations. Sound effects if assets exist.
-5. **Variety.** Warning (yellow), error (red) and downloading (dark gray) pop-up types, plus copy variety. Whether the types behave differently (e.g. downloading pop-ups spawn children if left open) gets decided at the start of this iteration.
-6. **Polish and ship.** Swap in Rickey's final assets, run the edge cases in §8 by hand, optionally host on GitHub Pages, and update the GDD to match what shipped.
+1. **Questions.** Rickey answers the iteration's clarifying questions. The answers are recorded in the §3 decisions log.
+2. **Plan.** An implementation plan is written for that iteration only.
+3. **Build.** Claude implements it, with the mechanics guide below as the reference for how each mechanic works.
+4. **Manual test.** Rickey plays it against the checklist.
+5. **Feedback.** Rickey sends feedback, assets and rule changes, and the spec is updated before the next iteration.
 
-## 10. Manual test checklists
+Each mechanic guide uses the same five parts: **What:** what the player experiences. **How:** how the code does it. **Knobs:** what to change in `config.js`. **Test:** how to check it by hand. **Broken:** what failure looks like.
 
-**Iteration 1**
-- [ ] Open `index.html` by double-clicking it. The round starts with no console errors.
+---
+
+### Iteration 1: Grey-box core loop
+
+**Goal:** the core loop is playable with plain boxes and no art. The round runs, spawns ramp up, clicks close pop-ups, and the game ends by crash or by success. End states can be plain text. The debug overlay is on the D key.
+
+**Questions for Rickey**
+1. **Who writes the code?** Should Claude write everything, or write it with teaching comments so you can explain and defend it in class?
+2. **Starting difficulty:** is `CAP = 12` and an interval ramping 1100 → 360 ms okay for a first feel, or do you want easier or harder?
+3. **Starting a round:** with no screens yet, should a round start on page load, or behind a temporary "click to start"?
+4. **Pop-up text:** use the placeholder joke copy from the demo, or will you send your own lines?
+
+**Mechanics guide**
+
+**Stage scaling**
+- **What:** the desktop always fills the window at a fixed shape, with bars on the sides if needed.
+- **How:** everything lives in a 1280×720 `#stage`. On load and on `resize`, `stage.js` sets `scale = min(innerWidth/1280, innerHeight/720)` as a CSS transform. Nothing inside the stage ever reads the real window size.
+- **Knobs:** none. The stage size is fixed on purpose.
+- **Test:** resize the window mid-round. Everything should shrink or grow together and stay in view.
+- **Broken:** pop-ups shift relative to each other, or a scrollbar appears.
+
+**Safe-area placement**
+- **What:** pop-ups always appear somewhere you can see and click.
+- **How:** a spawn picks `x` in `[SAFE.left, 1280 − w − SAFE.right]` and `y` in `[SAFE.top, 664 − h − SAFE.bottom]`. Every position, bloom ones included, is clamped into that box.
+- **Knobs:** `SAFE` margins, `POPUP_W` and `POPUP_H` ranges.
+- **Test:** turn on debug and watch a full round. Nothing should touch the taskbar, the icon column or an edge.
+- **Broken:** a pop-up is cut off, sits under the taskbar, or covers the recycle bin.
+
+**Spawn timer and ramp**
+- **What:** pop-ups arrive slowly at first and faster over time.
+- **How:** each frame adds `dt` to an accumulator. When the accumulator passes `nextSpawnIn`, one pop-up spawns and `nextSpawnIn = interval(t)`. A `while` loop catches up if a frame was slow.
+- **Knobs:** `FIRST_SPAWN_MS`, `INTERVAL_START_MS`, `INTERVAL_END_MS`, `INTERVAL_CURVE`. A curve above 1 keeps it calm longer; below 1 ramps up early.
+- **Test:** the debug interval should read about 1100 ms at 0:00, about 770 ms at 0:30 and about 430 ms at 0:55.
+- **Broken:** a burst of pop-ups after switching tabs, meaning `dt` isn't clamped, or a flat rate.
+
+**Bloom placement**
+- **What:** pop-ups spread in clusters instead of scattering evenly. This is the game's "Bloom" theme made visible.
+- **How:** with probability `BLOOM_CHANCE`, the new pop-up's position is a random open pop-up's position plus a random offset, then clamped to the safe area.
+- **Knobs:** `BLOOM_CHANCE` from 0 (pure random) to 1 (always clusters), and `BLOOM_OFFSET`.
+- **Test:** set `BLOOM_CHANCE` to 1 and then 0 and compare the rounds. Clusters should be obvious at 1.
+- **Broken:** pop-ups stack exactly on top of each other (offset too small), or clusters pile up in the corners because clamping is bunching them.
+
+**Close and score**
+- **What:** click anywhere on a pop-up and it vanishes. Score goes up.
+- **How:** one `pointerdown` listener on the pop-up layer finds the clicked pop-up with `closest('.popup')`. It marks it `.closing` (which blocks double counting), removes it after the animation, and calls `onClose`, so `game` can decrement `open` and increment `score`.
+- **Knobs:** close animation length (in CSS).
+- **Test:** click fast and repeatedly on one pop-up. Score should go up by exactly 1.
+- **Broken:** score jumps by 2, the open count goes negative, or a click passes through to the pop-up behind.
+
+**Crash cap**
+- **What:** if too many pop-ups are open at once, the PC crashes.
+- **How:** right after each spawn, check `open >= CAP`. If true, the screen state becomes `crashing`, input is ignored, and Game Over follows.
+- **Knobs:** `CAP`.
+- **Test:** don't click anything. The game should crash on the 12th spawn, at about 12 s.
+- **Broken:** a crash at 11 or 13, or the game keeps spawning after the crash.
+
+**Antivirus timer and success**
+- **What:** the antivirus installs over 60 s. Surviving that long wins.
+- **How:** `t` accumulates only while in `play`. `t >= ROUND_SECONDS` triggers success, and crash is checked first in the same frame.
+- **Knobs:** `ROUND_SECONDS`. Set it to 10 to test success quickly.
+- **Test:** with `ROUND_SECONDS = 10`, a round should end in success at 10 s.
+- **Broken:** the timer keeps running on the end screen, or runs while the tab is hidden.
+
+**Manual test checklist**
+- [ ] Open `index.html` by double-clicking it. No console errors.
 - [ ] The first pop-up appears within 1 s.
-- [ ] Spawns get visibly faster; the debug overlay's interval drops from ~1100 ms toward ~360 ms.
-- [ ] No pop-up ever appears off-screen, behind the taskbar or over the icon column (watch a full round).
-- [ ] Clicking anywhere on a pop-up closes it; score +1, open −1.
-- [ ] Leaving pop-ups open until 12 are open crashes immediately.
+- [ ] The debug interval drops from about 1100 ms toward 360 ms over the round.
+- [ ] No pop-up appears off-screen, under the taskbar or over the icon column.
+- [ ] A click anywhere on a pop-up closes it: score +1, open −1. Rapid clicks never double count.
+- [ ] Not clicking crashes exactly when 12 are open.
 - [ ] Surviving to 60 s triggers success.
-- [ ] Resizing the window mid-round keeps everything in place and in view.
+- [ ] Resizing mid-round keeps everything in place and in view.
 
-**Iteration 2**
+---
+
+### Iteration 2: Screen flow
+
+**Goal:** the full loop from the sketches. Title → Tutorial → Gameplay → Game Over / Success → back, with persistent last and best scores.
+
+**Questions for Rickey**
+1. **Tutorial frequency:** show the tutorial on every Start, as decided, or only the first time you ever play?
+2. **Retry route:** keep "try again" and "play again" skipping the tutorial and going straight to Gameplay?
+3. **Title score line:** should `Score:` show the last round (win or lose) or only the last win?
+4. **Pause:** add a pause on Esc, or no pausing to keep it tense?
+5. **Reset best:** add a hidden way to reset best, e.g. for class demos?
+
+**Mechanics guide**
+
+**Screen state machine**
+- **What:** exactly one screen is active at a time.
+- **How:** `screens.show(name)` sets `hidden` on every `.screen` except the named one and runs that screen's enter logic, such as filling in scores. `game` checks `state === 'play'` before doing anything.
+- **Knobs:** none.
+- **Test:** walk every arrow in §4. No two screens should ever show together.
+- **Broken:** the Title shows through behind Gameplay, or pop-ups carry over onto the Title.
+
+**Tutorial / practice pop-up**
+- **What:** one safe pop-up teaches you to close pop-ups, and closing it starts the round.
+- **How:** the practice pop-up is spawned with `data-practice`. Its close calls `startRound()` and is not counted toward score.
+- **Knobs:** instruction text and practice pop-up copy in `config.js`.
+- **Test:** close the practice pop-up. Score should stay 0 and the first real pop-up should arrive within 1 s.
+- **Broken:** score starts at 1, or the round starts before the practice pop-up is closed.
+
+**Persistence (last and best)**
+- **What:** Title remembers your last score and your best score, even after a reload.
+- **How:** at the end of each round, save `inav.last`, and update `inav.best` if the score beat it. Every storage call is wrapped in try/catch.
+- **Knobs:** none.
+- **Test:** play, reload the page, and check the Title. Try once in a private window too.
+- **Broken:** scores reset on reload, or the game fails to load when storage is blocked.
+
+**Manual test checklist**
 - [ ] Every arrow in the §4 flow works, including both "Back to desktop" links.
-- [ ] The practice pop-up doesn't count toward score; closing it starts the round.
-- [ ] Title shows the last and best scores; both survive a page reload.
-- [ ] Retry from Game Over / Success skips the tutorial.
+- [ ] The practice pop-up doesn't count; closing it starts the round.
+- [ ] Last and best show on Title and survive a reload.
+- [ ] Retry behaves the way Q2 decides.
+- [ ] No leftover pop-ups on any non-gameplay screen.
 
-**Iterations 3–6:** checklists are written at the start of each iteration.
+---
 
-## 11. Out of scope
+### Iteration 3: Art pass
+
+**Goal:** the XP-parody look from the GDD. The anchor pop-up, desktop icons, taskbar, progress bar, clock, Title ghosts, crash screen and success dialog.
+
+**Questions for Rickey**
+1. **Assets:** will you supply art (SVG/PNG) for icons, the start logo or pop-up parts, or should Claude draw everything in CSS and inline SVG?
+2. **Font:** which typefaces? Options include the demo's Fredoka and Rubik as local files, another bold rounded face, or system fonts only.
+3. **Desktop apps:** the GDD says 1–2 apps. Is the second icon "antivirus.exe" (as in the demo) or something else?
+4. **Crash screen:** palette blue (`#0078FD`, as in the demo), or dark gray (`#273548`)?
+5. **Title ghosts:** static, or slowly appearing and disappearing?
+
+**Mechanics guide**
+
+**Anchor asset rules**
+- **What:** every visual matches the pop-up window.
+- **How:** CSS custom properties hold border weight (`--line`), radius (`--radius`) and the palette. All components use those tokens and never raw values.
+- **Knobs:** changing `--line` or `--radius` re-styles the whole game at once.
+- **Test:** change `--radius` to 0 and every rounded element should follow.
+- **Broken:** any hard-coded color outside the palette, or mismatched border weights.
+
+**Antivirus progress bar**
+- **What:** the taskbar bar fills over 60 s, showing the timer in a way the player reads at a glance.
+- **How:** `hud.render` sets the fill width to `t / ROUND_SECONDS × 100%` and the label to the seconds remaining.
+- **Knobs:** none beyond `ROUND_SECONDS`.
+- **Test:** the bar should be about half full at 0:30 and full on Success.
+- **Broken:** the bar is jumpy, overflows, or keeps filling on Game Over.
+
+**Manual test checklist:** written at the start of the iteration, once the Q1 assets are known.
+
+---
+
+### Iteration 4: Tuning and feel
+
+**Goal:** the round matches the GDD's 0:00 / 0:30 / 0:55 beats and feels fast and fun.
+
+**Questions for Rickey**
+1. **Difficulty target:** roughly what share of first-time players should survive 60 s? Something like 1 in 5, half, or most?
+2. **Ramp shape:** a smooth ramp, or distinct "waves" that jump in intensity at 0:30 and 0:55?
+3. **Danger feedback:** which ones? Options are counter color (yellow at 7, red at 10), screen shake, a red screen tint, or a warning sound.
+4. **Sound:** do you have sound effects (pop-up, close, crash, win, start-up)? They must be original or licensed, not real Windows sounds. Is a mute toggle needed?
+5. **Juice:** pop-in and close animations, a score bump, a combo for fast closes? Pick any, or none.
+
+**Mechanics guide**
+
+**Difficulty tuning loop**
+- **What:** adjust the numbers until the round feels right.
+- **How:** play three rounds with debug on, then write down when you crashed and the open count at 0:30 and 0:55. Change one knob at a time.
+- **Knobs:** `INTERVAL_END_MS` (peak pressure), `INTERVAL_CURVE` (when the pressure arrives), `CAP` (how forgiving it is), `BLOOM_CHANCE` (how readable it is).
+- **Test:** a skilled player hovers around 4–8 open at 0:55; a new player crashes between 0:35 and 0:55.
+- **Broken:** everyone crashes before 0:30 (too hard), or nobody gets above 5 open (too easy).
+
+**Danger feedback**
+- **What:** the game warns you before the crash so a loss feels fair.
+- **How:** `hud.render` sets classes from `open / CAP` thresholds, and the CSS reacts to them.
+- **Knobs:** `WARN_AT`, `CRIT_AT`.
+- **Test:** the warning should fire early enough that you can react.
+- **Broken:** a crash comes with no warning, or the warning is on constantly and gets ignored.
+
+**Manual test checklist:** written at the start of the iteration.
+
+---
+
+### Iteration 5: Variety
+
+**Goal:** warning (yellow), error (red) and downloading (dark gray) pop-up types.
+
+**Questions for Rickey**
+1. **Look or behavior:** should types differ only in look, or also in behavior? Candidates:
+   - **Downloading:** spawns a child pop-up every few seconds if left open. This is "bloom" in its purest form.
+   - **Error:** takes two clicks.
+   - **Warning:** a normal pop-up.
+2. **Cap and score:** do all types count the same toward the cap and the score?
+3. **Unlocking:** when does each type start appearing? Everything from 0:00, or a new type at 0:20 and another at 0:40?
+4. **Recycle bin:** should the recycle bin do anything, such as dragging a virus into it, or stay decoration?
+
+**Mechanics guide:** written at the start of the iteration from the answers, e.g. type weights, the child-spawn timer and multi-click health.
+
+---
+
+### Iteration 6: Polish and ship
+
+**Goal:** final assets, the §8 edge cases checked by hand, and a shareable build.
+
+**Questions for Rickey**
+1. **Submission:** how does it get submitted or shared? A zip of the folder, GitHub Pages, itch.io, or something else?
+2. **Course rubric:** does the rubric require anything specific, such as a credits screen, a controls screen or documentation?
+3. **Final assets:** which final assets and credits need adding?
+4. **GDD update:** which parts of the GDD should be updated to match what shipped (the Success screen, the cut list, the lose rule)?
+
+**Manual test checklist:** every row in §8, a full playthrough of every screen, and a fresh-browser test with no saved scores.
+
+## 10. Out of scope
 
 - Precision clicking (GDD cut)
 - Leaderboards, accounts, online anything
