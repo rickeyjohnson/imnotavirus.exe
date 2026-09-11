@@ -24,6 +24,20 @@ INAV.config = {
   CLOSE_ANIM_MS: 100,
   END_LOCKOUT_MS: 500,
 
+  CRASH_DELAY_MS: 420,
+  CRASH_PCT_TICK_MS: 90,
+  PRACTICE_START_DELAY_MS: 250,
+
+  STORAGE_KEYS: { last: "inav.last", best: "inav.best" },
+
+  PRACTICE: {
+    title: "practice_popup.exe",
+    message: "Click anywhere on me to close me. That's the whole trick.",
+    w: 330,
+    h: 170,
+    y: 150,
+  },
+
   WARN_AT: 7,
   CRIT_AT: 10,
 

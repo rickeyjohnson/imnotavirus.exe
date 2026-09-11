@@ -13,7 +13,7 @@
     return layer.querySelectorAll(".popup:not(.closing)");
   }
 
-  function create(x, y, w, h) {
+  function create(x, y, w, h, title, message) {
     const el = document.createElement("div");
     el.className = "popup";
     el.style.left = x + "px";
@@ -24,35 +24,43 @@
 
     const bar = document.createElement("div");
     bar.className = "popup-bar";
-    bar.textContent = pick(C.TITLES);
+    bar.textContent = title;
 
     const body = document.createElement("div");
     body.className = "popup-body";
-    body.textContent = pick(C.MESSAGES);
+    body.textContent = message;
 
     el.append(bar, body);
     layer.appendChild(el);
     return el;
   }
 
-  function spawn() {
-    const w = Math.round(rand(C.POPUP_W.min, C.POPUP_W.max));
-    const h = Math.round(rand(C.POPUP_H.min, C.POPUP_H.max));
+  function spawn(opts = {}) {
+    const w = opts.w || Math.round(rand(C.POPUP_W.min, C.POPUP_W.max));
+    const h = opts.h || Math.round(rand(C.POPUP_H.min, C.POPUP_H.max));
     const area = INAV.stage.safeArea(w, h);
 
-    let x = rand(area.minX, area.maxX);
-    let y = rand(area.minY, area.maxY);
+    let x = opts.x;
+    let y = opts.y;
 
-    const open = live();
-    if (open.length > 0 && Math.random() < C.BLOOM_CHANCE) {
-      const source = pick(open);
-      x = parseFloat(source.style.left) + rand(-C.BLOOM_OFFSET.x, C.BLOOM_OFFSET.x);
-      y = parseFloat(source.style.top) + rand(-C.BLOOM_OFFSET.y, C.BLOOM_OFFSET.y);
+    if (x === undefined || y === undefined) {
+      x = rand(area.minX, area.maxX);
+      y = rand(area.minY, area.maxY);
+
+      const open = live();
+      if (open.length > 0 && Math.random() < C.BLOOM_CHANCE) {
+        const source = pick(open);
+        x = parseFloat(source.style.left) + rand(-C.BLOOM_OFFSET.x, C.BLOOM_OFFSET.x);
+        y = parseFloat(source.style.top) + rand(-C.BLOOM_OFFSET.y, C.BLOOM_OFFSET.y);
+      }
     }
 
     x = Math.round(clamp(x, area.minX, area.maxX));
     y = Math.round(clamp(y, area.minY, area.maxY));
-    return create(x, y, w, h);
+
+    const el = create(x, y, w, h, opts.title || pick(C.TITLES), opts.message || pick(C.MESSAGES));
+    if (opts.practice) el.dataset.practice = "1";
+    return el;
   }
 
   function close(el) {
