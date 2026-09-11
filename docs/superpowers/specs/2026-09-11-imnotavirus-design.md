@@ -18,7 +18,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 - **Only HTML, CSS and vanilla JavaScript.** No libraries, frameworks, build tools or package managers.
 - **Opens by double-clicking `index.html`.** No server required. This means classic `<script>` tags, not ES modules, because modules fail over `file://`.
 - **Manual testing only.** No unit tests. Every iteration ends with a manual test checklist (see §9).
-- **Fonts:** a system font stack until iteration 3. Any custom font ships as a local file in `assets/fonts/` (it counts as an asset, not a library), with a system fallback.
+- **Fonts:** a system font stack until iteration 3. From iteration 3 the game ships Fredoka and Rubik itself: the `.woff2` files live in `assets/fonts/` and are embedded as base64 in `css/fonts.css`, because Chrome refuses font file requests over `file://`. Fonts are assets, not libraries, and every stack keeps a system fallback.
 
 ## 3. Decisions log
 
@@ -40,6 +40,11 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Pause (iter 2 extras) | **Esc** or clicking the taskbar **start** button pauses and resumes during Gameplay | The timer and spawns freeze, pop-ups can't be clicked, and a "Paused" dialog with a resume button appears |
 | Title score (iter 2 Q3) | `Score:` shows the **last round, win or lose** | Default kept |
 | Reset best (iter 2 Q5) | **Not included** | — |
+| Art source (iter 3 Q1) | **Claude draws every asset** in CSS and inline SVG | No image files; SVG uses the palette tokens so `--line` and `--radius` restyle everything at once |
+| Fonts (iter 3 Q2) | **Fredoka** (display) + **Rubik** (body), SIL OFL 1.1 | Shipped in `assets/fonts/` and embedded base64 in `css/fonts.css` so they load from `file://` |
+| Desktop icons (iter 3 Q3) | Recycle Bin and **antivirus.exe**, plus the fake Windows flag on the taskbar start button | The flag is four palette-colored squares, not Microsoft's mark |
+| Crash screen (iter 3 Q4) | Accent blue `#0078FD` | |
+| Title ghosts (iter 3 Q5) | **Pop in and out at random intervals** behind the title | Static under `prefers-reduced-motion` |
 
 ## 4. Screens and flow
 
@@ -334,12 +339,12 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 
 **Goal:** the XP-parody look from the GDD. The anchor pop-up, desktop icons, taskbar, progress bar, clock, Title ghosts, crash screen and success dialog.
 
-**Questions for Rickey**
-1. **Assets:** will you supply art (SVG/PNG) for icons, the start logo or pop-up parts, or should Claude draw everything in CSS and inline SVG?
-2. **Font:** which typefaces? Options include the demo's Fredoka and Rubik as local files, another bold rounded face, or system fonts only.
-3. **Desktop apps:** the GDD says 1–2 apps. Is the second icon "antivirus.exe" (as in the demo) or something else?
-4. **Crash screen:** palette blue (`#0078FD`, as in the demo), or dark gray (`#273548`)?
-5. **Title ghosts:** static, or slowly appearing and disappearing?
+**Questions for Rickey** (answered 2026-09-11, see §3)
+1. **Assets:** will you supply art, or should Claude draw everything in CSS and inline SVG? **Claude draws it all.**
+2. **Font:** which typefaces? **Fredoka and Rubik, shipped locally and embedded as base64.**
+3. **Desktop apps:** is the second icon "antivirus.exe"? **Yes, plus the fake Windows flag on the taskbar start button.**
+4. **Crash screen:** blue or dark gray? **Palette blue `#0078FD`.**
+5. **Title ghosts:** static, or moving? **They pop in and out at random times.**
 
 **Mechanics guide**
 
@@ -357,7 +362,24 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 - **Test:** the bar should be about half full at 0:30 and full on Success.
 - **Broken:** the bar is jumpy, overflows, or keeps filling on Game Over.
 
-**Manual test checklist:** written at the start of the iteration, once the Q1 assets are known.
+**Title ghosts**
+- **What:** faded pop-ups appear and vanish behind the title, previewing the bloom before you press start.
+- **How:** `screens` runs a timer while the Title is showing, toggling one random ghost every `GHOST_TOGGLE_MS`. `show()` stops the timer on leaving the Title.
+- **Knobs:** `GHOST_TOGGLE_MS` (min/max).
+- **Test:** watch the Title for 10 s; ghosts come and go, and none of them is clickable. Under `prefers-reduced-motion` they all sit still and visible.
+- **Broken:** ghosts flicker rapidly, block the start button, or keep running after you leave the Title.
+
+**Manual test checklist**
+- [ ] Both fonts render when `index.html` is opened by double-click (not just through the preview server).
+- [ ] Pop-ups match the GDD anchor: blue title bar, red X, yellow "!" icon, two fake buttons, `--line` border, `--radius` corners.
+- [ ] Setting `--radius: 0` in `css/base.css` squares off every rounded element at once.
+- [ ] The desktop shows the Recycle Bin and antivirus.exe icons; the taskbar start button shows the four-square flag.
+- [ ] The antivirus bar is striped and about half full at 0:30, and full on Success.
+- [ ] The taskbar clock shows the real time.
+- [ ] The crash screen is palette blue with a big `:(`.
+- [ ] Ghost pop-ups come and go on the Title and never block the start button.
+- [ ] The start button reads "resume" while paused.
+- [ ] No color outside the six palette tokens appears anywhere (the pause dim is ink with alpha).
 
 ---
 
