@@ -8,6 +8,10 @@
     nextSpawnIn: C.FIRST_SPAWN_MS,
     lastFrame: 0,
     result: null,
+    scores: {
+      last: INAV.storage.get(C.STORAGE_KEYS.last, 0),
+      best: INAV.storage.get(C.STORAGE_KEYS.best, 0),
+    },
   };
   let onPhase = function () {};
 
@@ -24,6 +28,7 @@
       open: INAV.popups.count(),
       interval: interval(state.t),
       result: state.result,
+      scores: state.scores,
     };
   }
 
@@ -80,15 +85,21 @@
   }
 
   function recordResult(won) {
-    const previousBest = INAV.storage.get(C.STORAGE_KEYS.best, 0);
+    const previousBest = state.scores.best;
     const isBest = state.score > previousBest;
-    INAV.storage.set(C.STORAGE_KEYS.last, state.score);
-    if (isBest) INAV.storage.set(C.STORAGE_KEYS.best, state.score);
+
+    state.scores.last = state.score;
+    INAV.storage.set(C.STORAGE_KEYS.last, state.scores.last);
+    if (isBest) {
+      state.scores.best = state.score;
+      INAV.storage.set(C.STORAGE_KEYS.best, state.scores.best);
+    }
+
     state.result = {
       won,
       score: state.score,
       t: state.t,
-      best: Math.max(previousBest, state.score),
+      best: state.scores.best,
       isBest,
     };
   }

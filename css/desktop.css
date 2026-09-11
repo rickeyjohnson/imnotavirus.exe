@@ -117,7 +117,7 @@
   overflow: hidden;
   background: var(--paper);
   border: var(--line-thin) solid var(--ink);
-  border-radius: 11px;
+  border-radius: 999px;
 }
 
 .hud-meter-fill {

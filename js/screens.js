@@ -21,9 +21,9 @@
     }, C.END_LOCKOUT_MS);
   }
 
-  function enterTitle() {
-    $("title-last").textContent = INAV.storage.get(C.STORAGE_KEYS.last, 0);
-    $("title-best").textContent = INAV.storage.get(C.STORAGE_KEYS.best, 0);
+  function enterTitle(s) {
+    $("title-last").textContent = s.scores.last;
+    $("title-best").textContent = s.scores.best;
     $("start-btn").focus();
   }
 
