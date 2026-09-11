@@ -26,6 +26,7 @@ INAV.config = {
 
   CRASH_DELAY_MS: 420,
   CRASH_PCT_TICK_MS: 90,
+  CRASH_PCT_STEP_MAX: 9,
   PRACTICE_START_DELAY_MS: 250,
 
   STORAGE_KEYS: { last: "inav.last", best: "inav.best" },

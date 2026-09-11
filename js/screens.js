@@ -40,7 +40,7 @@
     let pct = 0;
     $("crash-pct").textContent = pct;
     pctTimer = setInterval(() => {
-      pct = Math.min(100, pct + 1 + Math.floor(Math.random() * 9));
+      pct = Math.min(100, pct + 1 + Math.floor(Math.random() * C.CRASH_PCT_STEP_MAX));
       $("crash-pct").textContent = pct;
       if (pct >= 100) clearInterval(pctTimer);
     }, C.CRASH_PCT_TICK_MS);
