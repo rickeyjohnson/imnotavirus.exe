@@ -34,7 +34,22 @@
 }
 
 .ghost {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 140ms linear, transform 140ms ease-out;
+}
+
+.ghost.ghost-on {
   opacity: 0.3;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghost {
+    opacity: 0.3;
+    transform: none;
+    transition: none;
+  }
 }
 
 .title-logo {

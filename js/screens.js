@@ -12,6 +12,31 @@
   const $ = (id) => document.getElementById(id);
   let pctTimer = null;
   let lockTimer = null;
+  let ghostTimer = null;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function scheduleGhost() {
+    const g = C.GHOST_TOGGLE_MS;
+    ghostTimer = setTimeout(() => {
+      const ghosts = document.querySelectorAll(".ghost");
+      const one = ghosts[Math.floor(Math.random() * ghosts.length)];
+      if (one) one.classList.toggle("ghost-on");
+      scheduleGhost();
+    }, g.min + Math.random() * (g.max - g.min));
+  }
+
+  function startGhosts() {
+    if (reducedMotion.matches) return;
+    document.querySelectorAll(".ghost").forEach((el) => {
+      el.classList.toggle("ghost-on", Math.random() < 0.5);
+    });
+    scheduleGhost();
+  }
+
+  function stopGhosts() {
+    clearTimeout(ghostTimer);
+    ghostTimer = null;
+  }
 
   function lockButton(btn) {
     btn.disabled = true;
@@ -25,6 +50,7 @@
     $("title-last").textContent = s.scores.last;
     $("title-best").textContent = s.scores.best;
     $("start-btn").focus();
+    startGhosts();
   }
 
   function enterPaused() {
@@ -79,6 +105,7 @@
       clearTimeout(lockTimer);
       pctTimer = null;
       lockTimer = null;
+      stopGhosts();
       const name = SCREEN_FOR_PHASE[phase];
       document.querySelectorAll("[data-screen]").forEach((el) => {
         el.hidden = el.dataset.screen !== name;
