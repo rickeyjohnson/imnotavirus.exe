@@ -15,10 +15,18 @@
   let ghostTimer = null;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+  function ghostsRoot() {
+    return document.querySelector(".ghosts");
+  }
+
   function scheduleGhost() {
     const g = C.GHOST_TOGGLE_MS;
     ghostTimer = setTimeout(() => {
-      const ghosts = document.querySelectorAll(".ghost");
+      if (reducedMotion.matches) {
+        stopGhosts();
+        return;
+      }
+      const ghosts = ghostsRoot().querySelectorAll(".ghost");
       const one = ghosts[Math.floor(Math.random() * ghosts.length)];
       if (one) one.classList.toggle("ghost-on");
       scheduleGhost();
@@ -26,8 +34,10 @@
   }
 
   function startGhosts() {
-    if (reducedMotion.matches) return;
-    document.querySelectorAll(".ghost").forEach((el) => {
+    const root = ghostsRoot();
+    if (!root || reducedMotion.matches) return;
+    root.classList.add("animated");
+    root.querySelectorAll(".ghost").forEach((el) => {
       el.classList.toggle("ghost-on", Math.random() < 0.5);
     });
     scheduleGhost();
@@ -36,6 +46,8 @@
   function stopGhosts() {
     clearTimeout(ghostTimer);
     ghostTimer = null;
+    const root = ghostsRoot();
+    if (root) root.classList.remove("animated");
   }
 
   function lockButton(btn) {

@@ -34,18 +34,24 @@
 }
 
 .ghost {
-  opacity: 0;
-  transform: scale(0.92);
+  opacity: 0.3;
   transition: opacity 140ms linear, transform 140ms ease-out;
 }
 
-.ghost.ghost-on {
+.ghosts.animated .ghost {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.ghosts.animated .ghost.ghost-on {
   opacity: 0.3;
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ghost {
+  .ghost,
+  .ghosts.animated .ghost,
+  .ghosts.animated .ghost.ghost-on {
     opacity: 0.3;
     transform: none;
     transition: none;
