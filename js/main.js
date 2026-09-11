@@ -4,6 +4,7 @@
 
   INAV.stage.init($("stage"));
   INAV.hud.init();
+  INAV.debug.init($("debug"));
   INAV.popups.init($("popups"), () => INAV.game.handleClose());
 
   INAV.game.init((result, s) => {

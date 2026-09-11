@@ -34,3 +34,16 @@ body {
   background: var(--desk);
   overflow: hidden;
 }
+
+#debug {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace;
+  pointer-events: none;
+}
