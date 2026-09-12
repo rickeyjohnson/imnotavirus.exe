@@ -17,14 +17,9 @@
     return layer.querySelectorAll(".popup:not(.closing)");
   }
 
-  function create(x, y, w, h, title, message) {
+  function buildWindow(cls, title, message) {
     const el = document.createElement("div");
-    el.className = "popup";
-    el.style.left = x + "px";
-    el.style.top = y + "px";
-    el.style.width = w + "px";
-    el.style.height = h + "px";
-    el.style.zIndex = ++z;
+    el.className = cls;
 
     el.innerHTML =
       '<div class="popup-bar"><span class="popup-title"></span><span class="popup-x">' + X_MARK + "</span></div>" +
@@ -39,6 +34,16 @@
     fakes[0].textContent = secondary;
     fakes[1].textContent = primary;
 
+    return el;
+  }
+
+  function create(x, y, w, h, title, message) {
+    const el = buildWindow("popup", title, message);
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.style.width = w + "px";
+    el.style.height = h + "px";
+    el.style.zIndex = ++z;
     layer.appendChild(el);
     return el;
   }
@@ -92,6 +97,14 @@
       layer.addEventListener("pointerdown", handlePointerDown);
     },
     spawn,
+    ghost(opts) {
+      const el = buildWindow("ghost", opts.title || pick(C.TITLES), opts.message || pick(C.MESSAGES));
+      el.style.left = opts.x + "px";
+      el.style.top = opts.y + "px";
+      el.style.width = opts.w + "px";
+      el.style.height = opts.h + "px";
+      return el;
+    },
     count() {
       return live().length;
     },

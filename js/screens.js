@@ -19,6 +19,32 @@
     return document.querySelector(".ghosts");
   }
 
+  function hitsReserved(x, y, w, h) {
+    const r = C.GHOST_RESERVED;
+    return x < r.x + r.w && x + w > r.x && y < r.y + r.h && y + h > r.y;
+  }
+
+  function buildGhosts() {
+    const root = ghostsRoot();
+    if (!root) return;
+    root.textContent = "";
+
+    const g = C.GHOSTS;
+    for (let i = 0; i < g.count; i++) {
+      const w = Math.round(g.w.min + Math.random() * (g.w.max - g.w.min));
+      const h = Math.round(g.h.min + Math.random() * (g.h.max - g.h.min));
+      const area = INAV.stage.safeArea(w, h);
+
+      for (let tries = 0; tries < 40; tries++) {
+        const x = Math.round(area.minX + Math.random() * (area.maxX - area.minX));
+        const y = Math.round(area.minY + Math.random() * (area.maxY - area.minY));
+        if (hitsReserved(x, y, w, h)) continue;
+        root.appendChild(INAV.popups.ghost({ x, y, w, h }));
+        break;
+      }
+    }
+  }
+
   function scheduleGhost() {
     const g = C.GHOST_TOGGLE_MS;
     ghostTimer = setTimeout(() => {
@@ -35,7 +61,9 @@
 
   function startGhosts() {
     const root = ghostsRoot();
-    if (!root || reducedMotion.matches) return;
+    if (!root) return;
+    buildGhosts();
+    if (reducedMotion.matches) return;
     root.classList.add("animated");
     root.querySelectorAll(".ghost").forEach((el) => {
       el.classList.toggle("ghost-on", Math.random() < 0.5);
