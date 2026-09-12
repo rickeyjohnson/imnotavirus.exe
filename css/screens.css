@@ -99,7 +99,7 @@
   background: var(--paper);
   color: var(--ink);
   border: var(--line) solid var(--ink);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) * 1.5);
   box-shadow: 0 var(--press) 0 var(--ink);
   font-family: var(--display);
   font-size: 28px;
