@@ -57,8 +57,8 @@
       const checked = INAV.names.check(entry.name);
       if (!checked.ok) return Promise.reject(new Error(checked.error));
 
-      const score = Math.round(Number(entry.score));
-      if (!Number.isFinite(score) || score < 0 || score > C.LEADERBOARD.SCORE_MAX) {
+      const score = Number(entry.score);
+      if (!Number.isInteger(score) || score < 0 || score > C.LEADERBOARD.SCORE_MAX) {
         return Promise.reject(new Error("That score isn't valid."));
       }
 

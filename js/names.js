@@ -3,8 +3,9 @@
 
   const LEET = { "0": "o", "1": "i", "!": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", "$": "s" };
 
-  // Unambiguous: no ordinary English word or name contains these, so matching
-  // them anywhere in the name is safe.
+  // Matched anywhere in the name. Deliberately over-broad: these also catch a
+  // few innocent words ("Scunthorpe", "niggle"), which is the trade we want —
+  // a false positive costs a retype, a false negative goes on a public board.
   const BLOCKED_ANYWHERE = [
     "fuck", "cunt", "bitch", "nigg", "faggot", "whore", "dildo", "bastard",
     "wank", "jizz", "clit", "scrotum", "penis", "vagina", "molest",
@@ -25,7 +26,7 @@
   function normalise(raw) {
     return String(raw == null ? "" : raw)
       .toLowerCase()
-      .replace(/[01345 7!@$]/g, (ch) => LEET[ch] || ch)
+      .replace(/[013457!@$]/g, (ch) => LEET[ch] || ch)
       .replace(/[^a-z ]/g, "")
       .replace(/\s+/g, " ")
       .trim()
@@ -47,8 +48,28 @@
     const compact = folded.replace(/ /g, "");
     const words = folded.split(" ").filter(Boolean);
 
+    // Spacing a word out is the obvious way past a whole-word filter, so join
+    // runs of single-character tokens: "a s s player" -> ["ass", "player"],
+    // while "bass player" keeps its tokens and stays allowed.
+    const joined = [];
+    let run = "";
+    words.forEach((word) => {
+      if (word.length === 1) {
+        run += word;
+        return;
+      }
+      if (run) {
+        joined.push(run);
+        run = "";
+      }
+      joined.push(word);
+    });
+    if (run) joined.push(run);
+
+    const isWord = (w) => words.includes(w) || joined.includes(w) || compact === w;
+
     if (BLOCKED_ANYWHERE.some((w) => compact.includes(w))) return { ok: false, error: "Pick a different name." };
-    if (BLOCKED_WORDS.some((w) => words.includes(w))) return { ok: false, error: "Pick a different name." };
+    if (BLOCKED_WORDS.some(isWord)) return { ok: false, error: "Pick a different name." };
 
     return { ok: true, name: name };
   }
