@@ -40,9 +40,11 @@
     const area = ghostArea(w, h);
     if (area.maxX < area.minX || area.maxY < area.minY) return;
 
+    const last = placed.length ? placed[placed.length - 1] : null;
     let fallback = null;
+    let best = null;
+    let bestGap = -1;
 
-    // Retry a spot that lands on top of another ghost, but never lose the ghost.
     for (let tries = 0; tries < C.GHOST_TRIES; tries++) {
       const box = {
         x: Math.round(area.minX + Math.random() * (area.maxX - area.minX)),
@@ -52,13 +54,18 @@
       };
       if (!fallback) fallback = box;
       if (placed.some((other) => overlapRatio(box, other) > C.GHOST_OVERLAP_MAX)) continue;
-      placed.push(box);
-      root.appendChild(INAV.popups.ghost(box));
-      return;
+
+      const gap = last ? Math.hypot(box.x + w / 2 - (last.x + last.w / 2), box.y + h / 2 - (last.y + last.h / 2)) : Infinity;
+      if (gap > bestGap) {
+        bestGap = gap;
+        best = box;
+      }
+      if (gap >= C.GHOST_MIN_DISTANCE) break;
     }
 
-    placed.push(fallback);
-    root.appendChild(INAV.popups.ghost(fallback));
+    const chosen = best || fallback;
+    placed.push(chosen);
+    root.appendChild(INAV.popups.ghost(chosen));
   }
 
   function buildGhosts() {

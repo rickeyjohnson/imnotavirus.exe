@@ -15,6 +15,7 @@
     },
   };
   let onPhase = function () {};
+  let tutorialShown = false;
 
   function interval(t) {
     const p = Math.min(Math.max(t / C.ROUND_SECONDS, 0), 1);
@@ -55,6 +56,12 @@
   }
 
   function startTutorial() {
+    if (tutorialShown) {
+      startRound();
+      return;
+    }
+    tutorialShown = true;
+
     resetRound();
     const P = C.PRACTICE;
     INAV.popups.spawn({

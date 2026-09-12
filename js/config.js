@@ -35,6 +35,7 @@ INAV.config = {
   GHOSTS: { count: 14, w: { min: 230, max: 285 }, h: { min: 160, max: 180 } },
   GHOST_MARGIN: 16,
   GHOST_TRIES: 16,
+  GHOST_MIN_DISTANCE: 340,
   GHOST_OVERLAP_MAX: 0.5,
   PRACTICE_START_DELAY_MS: 250,
 
