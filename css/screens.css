@@ -300,26 +300,3 @@
   line-height: 1.4;
 }
 
-.start-menu-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 18px;
-  background: var(--paper);
-  color: var(--ink);
-  border: var(--line-thin) solid var(--ink);
-  border-radius: calc(var(--radius) / 1.5);
-  font-family: var(--display);
-  font-size: 22px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.start-menu-item:hover {
-  background: var(--warn);
-}
-
-.start-menu-item:focus-visible {
-  outline: var(--line) solid var(--warn);
-  outline-offset: var(--line);
-}

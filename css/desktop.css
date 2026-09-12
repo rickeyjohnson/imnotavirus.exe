@@ -116,7 +116,8 @@
 }
 
 #hud-time {
-  width: 34px;
+  width: 46px;
+  font-variant-numeric: tabular-nums;
   text-align: right;
   font-weight: 700;
 }

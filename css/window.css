@@ -121,8 +121,13 @@
   background: var(--ink);
 }
 
+.popup-error {
+  border-color: var(--err);
+}
+
 .popup-error .popup-bar {
-  background: var(--err);
+  background: var(--ink);
+  border-bottom-color: var(--err);
 }
 
 .popup-error .popup-icon {

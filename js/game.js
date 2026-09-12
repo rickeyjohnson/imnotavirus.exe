@@ -67,6 +67,7 @@
     INAV.popups.spawn({
       x: Math.round((C.STAGE_W - P.w) / 2),
       y: P.y,
+      type: P.type,
       w: P.w,
       h: P.h,
       title: P.title,
@@ -152,6 +153,11 @@
 
   function step(dt) {
     state.t += dt / 1000;
+
+    if (state.t >= C.ROUND_SECONDS) {
+      succeed();
+      return;
+    }
     state.spawnAcc += dt;
 
     while (state.spawnAcc >= state.nextSpawnIn) {
@@ -177,8 +183,6 @@
       const gap = C.BURST_GAP_S;
       state.burstIn = (gap.min + Math.random() * (gap.max - gap.min)) * 1000;
     }
-
-    if (state.t >= C.ROUND_SECONDS) succeed();
   }
 
   // dt is clamped so a hidden tab can't release a burst of pop-ups when it returns.

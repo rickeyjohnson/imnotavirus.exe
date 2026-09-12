@@ -43,14 +43,12 @@ INAV.config = {
 
   PRACTICE: {
     title: "practice_popup.exe",
+    type: "plain",
     message: "Click anywhere on me to close me. That's the whole trick.",
     w: 330,
     h: 170,
     y: 150,
   },
-
-  WARN_AT: 7,
-  CRIT_AT: 10,
 
   POPUP_TYPES: [
     {
