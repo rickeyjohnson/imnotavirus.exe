@@ -203,7 +203,7 @@
         el.hidden = el.dataset.screen !== name;
       });
       const taskbar = document.getElementById("taskbar");
-      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash" || phase === "success";
+      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash";
       if (ENTER[phase]) ENTER[phase](s);
     },
   };

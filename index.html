@@ -70,12 +70,26 @@
     </section>
 
     <section data-screen="success" hidden>
-      <div class="win-face" aria-hidden="true">:)</div>
-      <h2>Antivirus installed. Your PC survived.</h2>
-      <p>You closed <strong id="success-score">0</strong> pop-ups in <span class="copy-seconds">60</span> seconds. Your best is <strong id="success-best">0</strong>.</p>
-      <span class="badge" id="success-new-best" hidden>New best</span>
-      <p class="win-note">Your PC is protected. For now.</p>
-      <button class="btn" id="play-again-btn" type="button">play again</button>
+      <div class="wizard" role="status" aria-live="polite">
+        <div class="wizard-bar">antivirus.exe — Setup</div>
+        <div class="wizard-body">
+          <h2>Installation complete.</h2>
+          <ul class="wizard-steps">
+            <li><span class="tick" aria-hidden="true">✓</span>Scanning system… done</li>
+            <li><span class="tick" aria-hidden="true">✓</span>Removing threats… done</li>
+            <li><span class="tick" aria-hidden="true">✓</span>Restarting services… done</li>
+          </ul>
+          <div class="wizard-meter" aria-hidden="true"><span class="wizard-meter-fill"></span></div>
+          <div class="stats">
+            <span>Closed: <strong id="success-score">0</strong></span>
+            <span>Best: <strong id="success-best">0</strong></span>
+          </div>
+          <span class="badge" id="success-new-best" hidden>New best</span>
+        </div>
+        <div class="wizard-foot">
+          <button class="btn small" id="play-again-btn" type="button">finish</button>
+        </div>
+      </div>
     </section>
 
     <section data-screen="crash" hidden>
