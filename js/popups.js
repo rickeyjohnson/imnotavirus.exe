@@ -111,10 +111,10 @@
     return el;
   }
 
-  function close(el) {
+  function close(el, notify) {
     el.classList.add("closing");
     setTimeout(() => el.remove(), C.CLOSE_ANIM_MS);
-    onClose(el);
+    if (notify !== false) onClose(el);
   }
 
   function handlePointerDown(e) {
@@ -143,6 +143,14 @@
     },
     count() {
       return live().length;
+    },
+    // Closes the oldest pop-up with the normal animation but without scoring it.
+    // Used by the win sweep, where the antivirus tidies up rather than the player.
+    closeOldest() {
+      const el = live()[0];
+      if (!el) return false;
+      close(el, false);
+      return true;
     },
     clear() {
       layer.replaceChildren();

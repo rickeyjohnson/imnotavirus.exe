@@ -9,14 +9,14 @@ INAV.config = {
   ROUND_SECONDS: 60,
 
   FIRST_SPAWN_MS: 600,
-  // Spawns per second at each keyframe: 1.0 flat to 0:10, 3.0 at 0:30, 5.0 at 1:00.
+  // Spawns per second at each keyframe: 1.0 flat to 0:10, 3.0 at 0:30, 3.7 at 1:00.
   // Gaps interpolate linearly in milliseconds, so the rate curve is back-loaded:
   // it still reads as ~1/s until about 0:22, then accelerates hard.
   SPAWN_RAMP: [
     { t: 0, ms: 1000 },
     { t: 10, ms: 1000 },
     { t: 30, ms: 333 },
-    { t: 60, ms: 200 },
+    { t: 60, ms: 270 },
   ],
   SPAWN_JITTER_PCT: 0.3,
   MAX_DT_MS: 100,
@@ -32,6 +32,10 @@ INAV.config = {
   END_LOCKOUT_MS: 500,
 
   CRASH_DELAY_MS: 420,
+  // Winning: the desk sweeps itself clear, holds a beat, then the wizard ticks its steps.
+  WIN_SWEEP_STEP_MS: 50,
+  WIN_SWEEP_HOLD_MS: 180,
+  WIN_TICK_STEP_MS: 220,
   CRASH_PCT_TICK_MS: 90,
   CRASH_PCT_STEP_MAX: 9,
   CLOCK_TICK_MS: 10000,

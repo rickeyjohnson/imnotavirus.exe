@@ -363,3 +363,45 @@
   padding: 0 24px 22px;
 }
 
+
+/* Win transition: the wizard rises, ticks its steps one at a time, then fills.
+   Only applied while .wizard-reveal is set, so reduced-motion gets the finished
+   state immediately. */
+@keyframes wizard-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 20px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+.wizard.wizard-reveal {
+  animation: wizard-rise 220ms ease-out both;
+}
+.wizard-reveal .wizard-steps li {
+  opacity: 0.45;
+  transition: opacity 160ms ease;
+}
+.wizard-reveal .wizard-steps li.done {
+  opacity: 1;
+}
+.wizard-reveal .tick {
+  background: var(--paper);
+  color: transparent;
+  transform: scale(0.72);
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease-out;
+}
+.wizard-reveal .wizard-steps li.done .tick {
+  background: var(--win);
+  color: var(--ink);
+  transform: scale(1);
+}
+.wizard-reveal .wizard-meter-fill {
+  width: 0;
+  transition: width 420ms ease-out;
+}
+.wizard-reveal.filled .wizard-meter-fill {
+  width: 100%;
+}

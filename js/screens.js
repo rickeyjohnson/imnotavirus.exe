@@ -6,12 +6,14 @@
     play: "play",
     paused: "paused",
     crashing: "play",
+    winning: "play",
     crash: "crash",
     success: "success",
   };
   const $ = (id) => document.getElementById(id);
   let pctTimer = null;
   let lockTimer = null;
+  let tickTimers = [];
   let ghostTimer = null;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -126,12 +128,12 @@
     if (root) root.classList.remove("animated");
   }
 
-  function lockButton(btn) {
+  function lockButton(btn, ms) {
     btn.disabled = true;
     lockTimer = setTimeout(() => {
       btn.disabled = false;
       btn.focus();
-    }, C.END_LOCKOUT_MS);
+    }, ms === undefined ? C.END_LOCKOUT_MS : ms);
   }
 
   function enterTitle(s) {
@@ -172,7 +174,28 @@
     $("success-score").textContent = r.score;
     $("success-best").textContent = r.best;
     $("success-new-best").hidden = !r.isBest;
-    lockButton($("play-again-btn"));
+
+    const wizard = document.querySelector('[data-screen="success"] .wizard');
+    if (!wizard || reducedMotion.matches) {
+      if (wizard) wizard.classList.remove("wizard-reveal");
+      lockButton($("play-again-btn"));
+      return;
+    }
+
+    // The steps tick over one at a time and the meter fills last. The step text is
+    // always in the DOM, so the live region announces the finished list once rather
+    // than nagging a screen reader on every tick.
+    const steps = wizard.querySelectorAll(".wizard-steps li");
+    wizard.classList.add("wizard-reveal");
+    wizard.classList.remove("filled");
+    steps.forEach((li) => li.classList.remove("done"));
+    steps.forEach((li, i) => {
+      tickTimers.push(setTimeout(() => li.classList.add("done"), C.WIN_TICK_STEP_MS * (i + 1)));
+    });
+
+    const fillAt = C.WIN_TICK_STEP_MS * (steps.length + 1);
+    tickTimers.push(setTimeout(() => wizard.classList.add("filled"), fillAt));
+    lockButton($("play-again-btn"), fillAt + C.END_LOCKOUT_MS);
   }
 
   const ENTER = {
@@ -195,6 +218,8 @@
     show(phase, s) {
       clearInterval(pctTimer);
       clearTimeout(lockTimer);
+      tickTimers.forEach(clearTimeout);
+      tickTimers = [];
       pctTimer = null;
       lockTimer = null;
       stopGhosts();
@@ -203,7 +228,7 @@
         el.hidden = el.dataset.screen !== name;
       });
       const taskbar = document.getElementById("taskbar");
-      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash";
+      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash" || phase === "winning";
       if (ENTER[phase]) ENTER[phase](s);
     },
   };

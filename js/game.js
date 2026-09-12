@@ -16,7 +16,7 @@
   let onPhase = function () {};
   let tutorialShown = false;
 
-  // Piecewise ramp: easy first 15s, hard by 0:30, tightening to the end.
+  // Piecewise ramp: a flat 1/sec through 0:10, 3/sec at 0:30, tightening to the end.
   function interval(t) {
     const keys = C.SPAWN_RAMP;
     for (let i = 0; i < keys.length - 1; i++) {
@@ -141,8 +141,25 @@
     INAV.popups.setEnabled(false);
     state.t = C.ROUND_SECONDS;
     recordResult(true);
-    INAV.popups.clear();
-    setPhase("success");
+    setPhase("winning");
+    sweep();
+  }
+
+  // The antivirus tidies the desk one pop-up at a time before the wizard appears,
+  // so a round that ended cluttered takes visibly longer to clear than a clean one.
+  function sweep() {
+    if (state.phase !== "winning") return;
+
+    if (INAV.popups.closeOldest()) {
+      setTimeout(sweep, C.WIN_SWEEP_STEP_MS);
+      return;
+    }
+
+    setTimeout(() => {
+      if (state.phase !== "winning") return;
+      INAV.popups.clear();
+      setPhase("success");
+    }, C.WIN_SWEEP_HOLD_MS);
   }
 
   function handleClose(el) {

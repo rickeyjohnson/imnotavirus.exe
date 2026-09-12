@@ -49,7 +49,8 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, filling the sc
 | Green (iter 3b, retuned iter 4) | **`#04B550` added as a sixth value**, a deliberate GDD amendment | Now used only for the wizard's tick badges. Three attempts at green-with-white text all failed contrast, which is why the win screen became a wizard instead |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
 | Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
-| Difficulty (iter 4, retuned twice after playtest) | A keyframed ramp: **1 pop-up a second flat until 0:10**, **3 a second at 0:30**, **5 a second at 1:00**. One pop-up at a time, with the gap **jittered ±30%** | Rickey found the burst version too hard, and disliked several pop-ups appearing at the same instant. The jitter keeps rounds from being identical, which is what stops every win scoring the same |
+| Difficulty (iter 4, retuned three times after playtest) | A keyframed ramp: **1 pop-up a second flat until 0:10**, **3 a second at 0:30**, **3.7 a second at 1:00**. One pop-up at a time, with the gap **jittered ±30%** |
+| Win transition | The desk **sweeps itself clear** one pop-up at a time (50 ms apart), holds a beat, then the wizard rises and **ticks its three steps** 220 ms apart before the meter fills | The instant swap gave the win no payoff, and the sweep's length scales with how cluttered the desk was, so a narrow win reads as a narrow win | Rickey found the burst version too hard, and disliked several pop-ups appearing at the same instant. The jitter keeps rounds from being identical, which is what stops every win scoring the same |
 | Cap (iter 4, retuned) | **18 open pop-ups** on a 6×3 grid, sized so the cap covers **88-89%** of the desktop (measured) | The original cap of 12 covered only ~63%, so losing looked less overrun than the menu |
 | Spawn placement (iter 4) | Pop-ups take the **least-occupied cell of a 6×4 grid** with a few pixels of jitter; Title ghosts use furthest-from-the-last placement | Replaces bloom-adjacency clustering. Grid placement is what makes a capped screen read as 90% full; bloom now means the screen filling, not clumps growing |
 | Tutorial (iter 4) | **Once per page session** (a refresh shows it again; retries in the same session skip it) | Testers never needed it twice; retrying through it was friction |
@@ -79,7 +80,7 @@ Title ──start──▶ Tutorial ──close practice pop-up──▶ Gamepla
 | **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, a "New best" badge when earned, **try again** (goes to Title) |
 | **Success** | The desktop, cleared of pop-ups, with a finished setup wizard: "Installation complete", three ticked steps, a full striped bar, Closed/Best, a "New best" badge when earned, and **finish** (goes to Title). The taskbar stays visible reading 100% |
 
-Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `success`.
+Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `winning` (the desk sweeps itself clear, 0.2–1.0 s depending on how many pop-ups survived), `success`. Both `crashing` and `winning` leave the desktop on screen and make the taskbar `inert`, so neither ending can be paused.
 
 ## 5. Gameplay rules
 
@@ -107,7 +108,7 @@ Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `pa
 `inav.last` holds the most recent finished round's score, `inav.best` the highest ever. `game` is the only module that touches storage; values are held in memory too, so a browser that refuses storage still plays correctly.
 
 ### 5.6 Tuning
-Every knob lives in `js/config.js` — round length, cap, the interval curve, burst gaps and sizes, pop-up sizes, the spawn grid, ghost behaviour and every delay. Read that file for current values rather than duplicating them here. Balance target, measured with a simulated player: ~2.5 clicks/second dies around 0:48, ~3.2 is roughly a coin flip, ~3.5 survives. A full round emits about 157 pop-ups, so surviving means averaging ~2.6 closes a second for the whole minute. An unattended round crashes at about 0:17.
+Every knob lives in `js/config.js` — round length, cap, the interval curve, burst gaps and sizes, pop-up sizes, the spawn grid, ghost behaviour and every delay. Read that file for current values rather than duplicating them here. Balance target, measured with a simulated player: ~2.2 clicks/second dies around 0:46, ~2.5 dies around 0:52, ~3.0 survives. A full round emits about 144 pop-ups, so surviving means averaging ~2.4 closes a second for the whole minute — close to the ceiling for aimed clicking at this target size, which is deliberate. An unattended round crashes at about 0:17.
 
 
 ## 6. Art direction (from the GDD)
@@ -174,6 +175,7 @@ assets/
 | Tab hidden mid-round | rAF pauses and `dt` is clamped, so the round effectively pauses with no burst on return |
 | Double-click / fast clicks on one pop-up | The `.closing` class blocks a second close; the count can't go negative |
 | Clicking a pop-up during `crashing` | Ignored (score/open only change in `play`) |
+| Pop-ups swept during `winning` | Closed with the normal animation but not scored — the antivirus tidies up, not the player |
 | localStorage blocked | try/catch; fall back to in-memory values |
 | Crash and success in the same frame | Success wins: the timer is checked at the top of the frame |
 

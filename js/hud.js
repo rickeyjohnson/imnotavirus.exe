@@ -6,6 +6,7 @@
     play: "Antivirus installing…",
     paused: "Antivirus paused",
     crashing: "Antivirus installing…",
+    winning: "Antivirus: protected",
     crash: "Antivirus failed",
     success: "Antivirus: protected",
   };
@@ -30,7 +31,7 @@
     },
 
     render(s) {
-      const done = s.phase === "success";
+      const done = s.phase === "success" || s.phase === "winning";
       const paused = s.phase === "paused";
       const progress = done ? 1 : Math.min(s.t / C.ROUND_SECONDS, 1);
       els.fill.style.width = progress * 100 + "%";
