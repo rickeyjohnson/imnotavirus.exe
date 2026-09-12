@@ -149,6 +149,15 @@
     if (root) root.classList.remove("animated");
   }
 
+  // The first build can measure the title before the web font swaps in.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      if (!INAV.game || INAV.game.snapshot().phase !== "title") return;
+      stopGhosts();
+      startGhosts();
+    });
+  }
+
   function lockButton(btn) {
     btn.disabled = true;
     lockTimer = setTimeout(() => {
