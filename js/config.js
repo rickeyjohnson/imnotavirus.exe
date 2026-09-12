@@ -9,11 +9,14 @@ INAV.config = {
   ROUND_SECONDS: 60,
 
   FIRST_SPAWN_MS: 600,
+  // Spawns per second at each keyframe: 1.0 flat to 0:10, 3.0 at 0:30, 5.0 at 1:00.
+  // Gaps interpolate linearly in milliseconds, so the rate curve is back-loaded:
+  // it still reads as ~1/s until about 0:22, then accelerates hard.
   SPAWN_RAMP: [
-    { t: 0, ms: 1150 },
-    { t: 15, ms: 950 },
-    { t: 30, ms: 400 },
-    { t: 60, ms: 260 },
+    { t: 0, ms: 1000 },
+    { t: 10, ms: 1000 },
+    { t: 30, ms: 333 },
+    { t: 60, ms: 200 },
   ],
   SPAWN_JITTER_PCT: 0.3,
   MAX_DT_MS: 100,
