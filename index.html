@@ -62,13 +62,18 @@
     <section data-screen="play" hidden></section>
 
     <section data-screen="paused" hidden>
-      <div class="dialog" role="dialog" aria-labelledby="paused-heading">
-        <div class="dialog-bar">antivirus.exe — Paused</div>
-        <div class="dialog-body">
-          <h2 id="paused-heading">Install paused.</h2>
-          <p>The timer and the pop-ups are frozen. Press Esc or the start button to keep going.</p>
-          <button class="btn" id="resume-btn" type="button">resume</button>
+      <div class="start-menu" role="dialog" aria-labelledby="paused-heading">
+        <div class="start-menu-head">
+          <span class="hud-flag" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <h2 id="paused-heading">Paused</h2>
         </div>
+        <ul class="start-menu-rows">
+          <li><span>Pop-ups closed</span><strong id="pause-closed">0</strong></li>
+          <li><span>Pop-ups open</span><strong id="pause-open">0</strong></li>
+          <li><span>Seconds left</span><strong id="pause-time">60</strong></li>
+        </ul>
+        <p class="start-menu-hint">Press Esc or the start button to keep going.</p>
+        <button class="start-menu-item" id="resume-btn" type="button">resume</button>
       </div>
     </section>
 

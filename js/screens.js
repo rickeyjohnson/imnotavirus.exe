@@ -65,7 +65,10 @@
     startGhosts();
   }
 
-  function enterPaused() {
+  function enterPaused(s) {
+    $("pause-closed").textContent = s.score;
+    $("pause-open").textContent = s.open;
+    $("pause-time").textContent = Math.max(0, Math.ceil(C.ROUND_SECONDS - s.t));
     $("resume-btn").focus();
   }
 
