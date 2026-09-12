@@ -48,7 +48,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Win screen (iter 3b) | **Full-screen green `:)`** replacing the success dialog | Mirrors the crash screen, so winning and losing are two sides of the same coin |
 | Green (iter 3b) | **`#00C853` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Text on it is `--ink` (5.5:1); white on green is 2.2:1 and is not allowed |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
-| Title ghosts (iter 3b) | **10 ghosts at random spread-out positions**, built by JS | A reserved band keeps the logo, tagline, start button and scores readable |
+| Title ghosts (iter 3b, revised) | **14 ghosts anywhere on screen**, built by JS, popping faster | No reserved band: the title block paints over the ghosts, so it stays readable. Ghosts are sized like real pop-ups so their content never clips, and placement rejects piling on an already-placed ghost |
 
 ## 4. Screens and flow
 
@@ -403,12 +403,12 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 - **Test:** pause at about 0:20 and the rows match the taskbar; Esc, the start button and the resume item all continue the round.
 - **Broken:** the panel floats detached from the taskbar, covers the start button, or shows stale numbers.
 
-**Ten spread-out ghosts**
-- **What:** the Title's decorative pop-ups go from five fixed positions to ten random ones.
-- **How:** `screens` builds them on entering the Title, using the same window markup as real pop-ups, placing each one in the safe area but outside a reserved band behind the logo, tagline, start button and scores.
-- **Knobs:** `GHOSTS` (count and size range) and `GHOST_RESERVED` (the protected band).
-- **Test:** reload the Title several times; ten ghosts, different every time, and the title text always readable.
-- **Broken:** ghosts overlap the logo, clump in one corner, or spill off-screen.
+**Title ghosts**
+- **What:** decorative pop-ups scattered across the Title, popping in and out.
+- **How:** `screens` builds them on entering the Title, using the same window markup as real pop-ups, placing each one anywhere inside `GHOST_MARGIN` of the play area. Placement retries up to `GHOST_TRIES` times to avoid covering more than `GHOST_OVERLAP_MAX` of an already-placed ghost, then takes its first candidate so a ghost is never lost. The title block is a later sibling, so it paints over the ghosts and stays readable without a reserved band.
+- **Knobs:** `GHOSTS` (count and size range), `GHOST_MARGIN`, `GHOST_TRIES`, `GHOST_OVERLAP_MAX`, `GHOST_TOGGLE_MS`.
+- **Test:** reload the Title several times. Ghosts are placed differently each time, none is clipped by the stage edge or the taskbar, none is more than half-covered by another, every ghost shows its whole window (title bar, message and both fake buttons), and the title text reads clearly over them.
+- **Broken:** ghosts spill off-screen or under the taskbar, stack into a pile, or clip their own footer buttons.
 
 **Win screen**
 - **What:** surviving 60 seconds shows a full-screen green `:)`, the twin of the crash screen.
@@ -419,7 +419,7 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 
 **Manual test checklist**
 - [ ] The pause panel sits above the start button, its numbers match the taskbar, and all three ways to resume work.
-- [ ] Ten ghosts, newly placed on each visit to the Title, never covering the title text. Test it against the rendered elements (`.center > *` rects), not against the reserved rectangle — the placement math makes the latter pass by construction.
+- [ ] Ghosts are newly placed on each visit to the Title, and each one shows its whole window with nothing clipped. Measure clipping from the rendered boxes (a footer's bottom against its ghost's content box), not from the configured sizes.
 - [ ] Winning shows the green `:)` screen with dark text; losing still shows the blue one.
 - [ ] "New best" still appears only when the record is beaten.
 
