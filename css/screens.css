@@ -12,7 +12,8 @@
 [data-screen] button,
 .dialog,
 [data-screen="paused"],
-[data-screen="crash"] {
+[data-screen="crash"],
+[data-screen="success"] {
   pointer-events: auto;
 }
 
@@ -242,4 +243,43 @@
 
 .crash-pct {
   font-variant-numeric: tabular-nums;
+}
+
+[data-screen="success"] {
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 84px 140px;
+  background: var(--win);
+  color: var(--ink);
+}
+
+.win-face {
+  margin-bottom: 8px;
+  font-family: var(--display);
+  font-size: 150px;
+  font-weight: 500;
+  line-height: 0.8;
+}
+
+[data-screen="success"] h2 {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+[data-screen="success"] p {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.win-note {
+  font-weight: 500;
 }

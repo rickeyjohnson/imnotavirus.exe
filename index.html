@@ -73,18 +73,12 @@
     </section>
 
     <section data-screen="success" hidden>
-      <div class="dialog" role="dialog" aria-labelledby="success-heading">
-        <div class="dialog-bar">antivirus.exe — Setup</div>
-        <div class="dialog-body">
-          <h2 id="success-heading">Installation complete.<br>Your PC survived.</h2>
-          <span class="badge" id="success-new-best" hidden>New best</span>
-          <div class="stats">
-            <span>Score: <strong id="success-score">0</strong></span>
-            <span>Best: <strong id="success-best">0</strong></span>
-          </div>
-          <button class="btn" id="play-again-btn" type="button">play again</button>
-        </div>
-      </div>
+      <div class="win-face" aria-hidden="true">:)</div>
+      <h2>Antivirus installed. Your PC survived.</h2>
+      <p>You closed <strong id="success-score">0</strong> pop-ups in <span class="copy-seconds">60</span> seconds. Your best is <strong id="success-best">0</strong>.</p>
+      <span class="badge" id="success-new-best" hidden>New best</span>
+      <p class="win-note">Your PC is protected. For now.</p>
+      <button class="btn" id="play-again-btn" type="button">play again</button>
     </section>
 
     <section data-screen="crash" hidden>
