@@ -30,6 +30,8 @@ INAV.config = {
   CLOCK_TICK_MS: 10000,
   GHOST_TOGGLE_MS: { min: 500, max: 1600 },
   GHOSTS: { count: 10, w: { min: 150, max: 200 }, h: { min: 110, max: 140 } },
+  GHOST_MARGIN: 16,
+  GHOST_CLEARANCE: 14,
   GHOST_RESERVED: { x: 330, y: 175, w: 620, h: 310 },
   PRACTICE_START_DELAY_MS: 250,
 

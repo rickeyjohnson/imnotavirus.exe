@@ -249,7 +249,7 @@
   padding: 18px;
   background: var(--ink);
   color: var(--paper);
-  border: var(--line) solid var(--ink);
+  border: var(--line) solid var(--paper);
   border-radius: 0 var(--radius) 0 0;
 }
 

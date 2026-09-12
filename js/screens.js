@@ -19,15 +19,60 @@
     return document.querySelector(".ghosts");
   }
 
-  function hitsReserved(x, y, w, h) {
-    const r = C.GHOST_RESERVED;
+  function ghostArea(w, h) {
+    const m = C.GHOST_MARGIN;
+    return {
+      minX: m,
+      maxX: C.STAGE_W - w - m,
+      minY: m,
+      maxY: C.STAGE_H - C.TASKBAR_H - h - m,
+    };
+  }
+
+  // Measured from the rendered title block so it can't drift from the layout.
+  function reservedRect() {
+    const fallback = C.GHOST_RESERVED;
+    const stageEl = document.getElementById("stage");
+    const parts = document.querySelectorAll('[data-screen="title"] .center > *');
+    if (!stageEl || parts.length === 0) return fallback;
+
+    const stageBox = stageEl.getBoundingClientRect();
+    if (!stageBox.width) return fallback;
+
+    const scale = stageBox.width / C.STAGE_W;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    parts.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      minX = Math.min(minX, (r.left - stageBox.left) / scale);
+      minY = Math.min(minY, (r.top - stageBox.top) / scale);
+      maxX = Math.max(maxX, (r.right - stageBox.left) / scale);
+      maxY = Math.max(maxY, (r.bottom - stageBox.top) / scale);
+    });
+
+    if (!isFinite(minX)) return fallback;
+
+    const pad = C.GHOST_CLEARANCE;
+    const x = Math.min(minX - pad, fallback.x);
+    const y = Math.min(minY - pad, fallback.y);
+    return {
+      x,
+      y,
+      w: Math.max(maxX + pad, fallback.x + fallback.w) - x,
+      h: Math.max(maxY + pad, fallback.y + fallback.h) - y,
+    };
+  }
+
+  function hitsRect(r, x, y, w, h) {
     return x < r.x + r.w && x + w > r.x && y < r.y + r.h && y + h > r.y;
   }
 
-
-  function ghostBands(w, h) {
-    const r = C.GHOST_RESERVED;
-    const a = INAV.stage.safeArea(w, h);
+  function ghostBands(r, w, h) {
+    const a = ghostArea(w, h);
     return [
       { minX: a.minX, maxX: a.maxX, minY: a.minY, maxY: Math.min(a.maxY, r.y - h) },
       { minX: Math.max(a.minX, r.x + r.w), maxX: a.maxX, minY: a.minY, maxY: a.maxY },
@@ -35,29 +80,40 @@
       { minX: a.minX, maxX: Math.min(a.maxX, r.x - w), minY: a.minY, maxY: a.maxY },
     ];
   }
+
+  function placeGhost(root, r, i, w, h) {
+    const bands = ghostBands(r, w, h);
+
+    // Round-robin the bands so the ghosts ring the title instead of filling the widest gap.
+    for (let step = 0; step < bands.length; step++) {
+      const band = bands[(i + step) % bands.length];
+      if (band.maxX < band.minX || band.maxY < band.minY) continue;
+      const x = Math.round(band.minX + Math.random() * (band.maxX - band.minX));
+      const y = Math.round(band.minY + Math.random() * (band.maxY - band.minY));
+      if (hitsRect(r, x, y, w, h)) continue;
+      root.appendChild(INAV.popups.ghost({ x, y, w, h }));
+      return true;
+    }
+
+    return false;
+  }
+
   function buildGhosts() {
     const root = ghostsRoot();
     if (!root) return;
     root.textContent = "";
 
     const g = C.GHOSTS;
+    const reserved = reservedRect();
+    let dropped = 0;
+
     for (let i = 0; i < g.count; i++) {
       const w = Math.round(g.w.min + Math.random() * (g.w.max - g.w.min));
       const h = Math.round(g.h.min + Math.random() * (g.h.max - g.h.min));
-      const bands = ghostBands(w, h);
-
-      // Round-robin the bands so the ghosts ring the title instead of filling the widest gap.
-      for (let step = 0; step < bands.length; step++) {
-        const band = bands[(i + step) % bands.length];
-        if (band.maxX < band.minX || band.maxY < band.minY) continue;
-        const x = Math.round(band.minX + Math.random() * (band.maxX - band.minX));
-        const y = Math.round(band.minY + Math.random() * (band.maxY - band.minY));
-        if (hitsReserved(x, y, w, h)) continue;
-        root.appendChild(INAV.popups.ghost({ x, y, w, h }));
-        break;
-      }
-
+      if (!placeGhost(root, reserved, i, w, h)) dropped++;
     }
+
+    if (dropped > 0) console.warn("ghosts: no room for " + dropped + " of " + g.count);
   }
 
   function scheduleGhost() {
@@ -168,6 +224,8 @@
       document.querySelectorAll("[data-screen]").forEach((el) => {
         el.hidden = el.dataset.screen !== name;
       });
+      const taskbar = document.getElementById("taskbar");
+      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash" || phase === "success";
       if (ENTER[phase]) ENTER[phase](s);
     },
   };
