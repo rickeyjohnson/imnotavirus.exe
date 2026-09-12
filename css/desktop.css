@@ -91,18 +91,6 @@
 .hud-flag i:nth-child(3) { background: var(--paper); }
 .hud-flag i:nth-child(4) { background: var(--warn); }
 
-.hud-chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  height: 32px;
-  padding: 0 12px;
-  background: var(--paper);
-  color: var(--ink);
-  border: var(--line-thin) solid var(--ink);
-  border-radius: calc(var(--radius) / 1.5);
-}
-
 .hud-av {
   margin-left: auto;
   display: flex;

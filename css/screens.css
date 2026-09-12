@@ -208,7 +208,7 @@
   gap: 20px;
   padding: 84px 140px;
   background: var(--win);
-  color: var(--ink);
+  color: var(--paper);
 }
 
 .win-face {
@@ -284,7 +284,8 @@
   background: var(--blue);
   color: var(--paper);
   border-radius: calc(var(--radius) / 3);
-  font-size: 15px;
+  font-size: 19px;
+  font-weight: 700;
 }
 
 .start-menu-rows strong {
