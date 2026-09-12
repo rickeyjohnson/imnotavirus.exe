@@ -194,18 +194,28 @@ Each iteration ships something playable, gets hand-tested against its checklist,
 | 2 | Screen flow: title, tutorial, pause, crash, success; saved scores; one phase machine | `plans/2026-09-11-iteration-2-screen-flow.md` |
 | 3 | Art pass: local fonts, design tokens, the anchor pop-up, desktop icons, taskbar, screen art | `plans/2026-09-11-iteration-3-art-pass.md` |
 | 3b | Green win screen, start-menu pause panel, scattered title ghosts | `plans/2026-09-11-iteration-3b-polish.md` |
+| 4b | Sweep-and-tick win transition (`winning` phase); tail eased to 3.7 spawns/sec at 1:00 | This file, §3 and §5 |
 | 4 | Playtest response: keyframed ramp (flat to 0:10, hard by 0:30), cap 18 at ~88% coverage, four pop-up types, install percentage, per-session tutorial, setup-wizard win screen | `plans/2026-09-12-iteration-4-difficulty.md` |
 
-### Iteration 5: Variety with behaviour
+### Iteration 7 (next): Global leaderboard
 
-Types exist visually; this iteration gives them behaviour. Notes carried from earlier reviews:
+Specced in `2026-09-12-leaderboard-design.md`. Phase one is the UI against a
+fake local source; phase two wires a backend and moves the game to GitHub Pages.
+
+### Iteration 5 (deferred): Variety with behaviour
+
+Deferred 2026-09-12 — revisit after more playtesting. The four types are still
+cosmetic. Note that every type which spawns children invalidates the current
+balance, so this needs a tuning pass behind it.
+
+Types exist visually; this iteration would give them behaviour. Notes carried from earlier reviews:
 - Child spawns must be driven by `game.step(dt)`, never their own `setTimeout`, or a pop-up would breed through the pause screen.
 - `popups.create()` takes positional arguments; move it to an options object before adding another.
 - `stage.safeArea` can return an inverted range once a type is bigger than the play area — clamp it then.
 - `#popups` covers the desktop icons, so it swallows clicks over them. That only matters if the Recycle Bin ever becomes interactive.
 - Danger colours: `--err` can't carry small text (3.2:1 either way). Show danger with border weight, fills or the meter.
 
-### Iteration 6: Polish and ship
+### Iteration 6 (deferred): Polish and ship
 
 - Fold the crash and win screens into one shared rule set; their headings disagree on weight.
 - Return focus to the taskbar button after resuming; vary the ghost ring order.
@@ -218,6 +228,6 @@ Types exist visually; this iteration gives them behaviour. Notes carried from ea
 ## 10. Out of scope
 
 - Precision clicking (GDD cut)
-- Leaderboards, accounts, online anything
+- Accounts, authentication, any social feature beyond a name and a score (the global leaderboard is specced in `2026-09-12-leaderboard-design.md`)
 - Mobile/touch-first layout (pointer events keep touch working, but it isn't tuned for it)
 - Libraries, frameworks, build tooling
