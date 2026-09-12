@@ -4,7 +4,6 @@
   let onClose = function () {};
   let enabled = false;
   let z = 0;
-  let lastSpawn = null;
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -27,6 +26,23 @@
 
   function live() {
     return layer.querySelectorAll(".popup:not(.closing)");
+  }
+
+  // Spread spawns over a coarse grid so a full screen of pop-ups actually fills it.
+  function pickCell() {
+    const g = C.SPAWN_GRID;
+    const counts = new Array(g.cols * g.rows).fill(0);
+    live().forEach((el) => {
+      const cell = Number(el.dataset.cell);
+      if (Number.isInteger(cell) && cell >= 0 && cell < counts.length) counts[cell]++;
+    });
+
+    const fewest = Math.min.apply(null, counts);
+    const free = [];
+    counts.forEach((n, i) => {
+      if (n === fewest) free.push(i);
+    });
+    return free[Math.floor(Math.random() * free.length)];
   }
 
   function buildWindow(cls, type, title, message) {
@@ -72,36 +88,25 @@
 
     let x = opts.x;
     let y = opts.y;
+    let cell = -1;
 
     if (x === undefined || y === undefined) {
-      let best = null;
-      let bestGap = -1;
-
-      // Push each pop-up away from the one before it, so they fill the desktop
-      // instead of clustering where the player is already looking.
-      for (let tries = 0; tries < C.SPAWN_PLACE_TRIES; tries++) {
-        const cx = rand(area.minX, area.maxX);
-        const cy = rand(area.minY, area.maxY);
-        const gap = lastSpawn
-          ? Math.hypot(cx + w / 2 - lastSpawn.x, cy + h / 2 - lastSpawn.y)
-          : Infinity;
-        if (gap > bestGap) {
-          bestGap = gap;
-          best = { x: cx, y: cy };
-        }
-        if (gap >= C.SPAWN_MIN_DISTANCE) break;
-      }
-
-      x = best.x;
-      y = best.y;
+      const g = C.SPAWN_GRID;
+      cell = pickCell();
+      const cw = (C.STAGE_W - C.SAFE.left - C.SAFE.right) / g.cols;
+      const ch = (C.STAGE_H - C.TASKBAR_H - C.SAFE.top - C.SAFE.bottom) / g.rows;
+      const col = cell % g.cols;
+      const row = Math.floor(cell / g.cols);
+      x = C.SAFE.left + col * cw + (cw - w) / 2 + rand(-C.SPAWN_JITTER, C.SPAWN_JITTER);
+      y = C.SAFE.top + row * ch + (ch - h) / 2 + rand(-C.SPAWN_JITTER, C.SPAWN_JITTER);
     }
 
     x = Math.round(clamp(x, area.minX, area.maxX));
     y = Math.round(clamp(y, area.minY, area.maxY));
-    lastSpawn = { x: x + w / 2, y: y + h / 2 };
 
     const type = pickType(opts.type);
     const el = create(x, y, w, h, type, opts.title || pick(type.titles), opts.message || pick(type.messages));
+    if (cell >= 0) el.dataset.cell = String(cell);
     if (opts.practice) el.dataset.practice = "1";
     return el;
   }
@@ -142,7 +147,6 @@
     clear() {
       layer.replaceChildren();
       z = 0;
-      lastSpawn = null;
     },
     setEnabled(on) {
       enabled = on;

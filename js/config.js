@@ -16,12 +16,13 @@ INAV.config = {
 
   BURST_GAP_S: { min: 3, max: 6 },
   BURST_SIZE: { start: 2, end: 5 },
-  SPAWN_MIN_DISTANCE: 420,
-  SPAWN_PLACE_TRIES: 14,
+  BURST_JITTER: { min: -1, max: 2 },
+  SPAWN_GRID: { cols: 6, rows: 4 },
+  SPAWN_JITTER: 6,
 
-  POPUP_W: { min: 195, max: 235 },
-  POPUP_H: { min: 150, max: 170 },
-  SAFE: { left: 130, top: 16, right: 16, bottom: 16 },
+  POPUP_W: { min: 215, max: 240 },
+  POPUP_H: { min: 160, max: 178 },
+  SAFE: { left: 16, top: 16, right: 16, bottom: 16 },
 
   CLOSE_ANIM_MS: 100,
   END_LOCKOUT_MS: 500,

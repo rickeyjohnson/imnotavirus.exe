@@ -7,7 +7,6 @@
     spawnAcc: 0,
     nextSpawnIn: C.FIRST_SPAWN_MS,
     burstIn: 0,
-    burstArmed: false,
     lastFrame: 0,
     result: null,
     scores: {
@@ -46,7 +45,6 @@
     state.spawnAcc = 0;
     state.nextSpawnIn = C.FIRST_SPAWN_MS;
     state.burstIn = C.BURST_GAP_S.min * 1000;
-    state.burstArmed = true;
     state.result = null;
   }
 
@@ -141,7 +139,8 @@
   function burstSize(t) {
     const p = Math.min(Math.max(t / C.ROUND_SECONDS, 0), 1);
     const mid = C.BURST_SIZE.start + (C.BURST_SIZE.end - C.BURST_SIZE.start) * p;
-    return Math.max(1, Math.round(mid - 1 + Math.random() * 3));
+    const j = C.BURST_JITTER;
+    return Math.max(1, Math.round(mid + j.min + Math.random() * (j.max - j.min)));
   }
 
   function step(dt) {
@@ -159,7 +158,7 @@
     }
 
     state.burstIn -= dt;
-    if (state.burstArmed && state.burstIn <= 0) {
+    if (state.burstIn <= 0) {
       const count = burstSize(state.t);
       for (let i = 0; i < count; i++) {
         INAV.popups.spawn();
