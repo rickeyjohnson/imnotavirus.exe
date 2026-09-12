@@ -9,7 +9,7 @@
 
 ## 1. Premise
 
-You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they spread ("bloom") across the screen. Your antivirus takes **60 seconds** to install. Close pop-ups fast enough to survive until it finishes. If too many pile up, the computer crashes.
+You are a Windows XP-era computer desktop. Pop-ups keep spawning, filling the screen ("bloom") until nothing else is visible. Your antivirus takes **60 seconds** to install. Close pop-ups fast enough to survive until it finishes. If too many pile up, the computer crashes.
 
 **Mood:** fast, fun, simple.
 
@@ -51,7 +51,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
 | Difficulty (iter 4) | Peak pressure by **0:30**, not 0:55, plus **random bursts** (a few pop-ups arriving together) | Bursts also make scores differ run to run, which the old fixed curve could not |
 | Cap (iter 4) | **24 open pop-ups**, with pop-ups sized so the cap covers **85-95%** of the desktop | The old cap of 12 covered ~63%, so losing looked less overrun than the menu |
-| Spawn placement (iter 4) | Each pop-up spawns **far from the previous one**; same for Title ghosts | Replaces the old bloom-adjacency clustering. Bloom now reads as the whole screen filling rather than clumps growing |
+| Spawn placement (iter 4) | Pop-ups take the **least-occupied cell of a 6×4 grid** with a few pixels of jitter; Title ghosts use furthest-from-the-last placement | Replaces bloom-adjacency clustering. Grid placement is what makes a capped screen read as 90% full; bloom now means the screen filling, not clumps growing |
 | Tutorial (iter 4) | **Once per page session** (a refresh shows it again; retries in the same session skip it) | Testers never needed it twice; retrying through it was friction |
 | Pop-up types (iter 4) | **Warning (yellow), error (red danger), downloading (dark terminal)** plus the plain one | Visual variety now; different behavior stays in iteration 5 |
 | Taskbar (iter 4) | Install **percentage** instead of a seconds countdown; closed/open counts move into the pause panel; the start button reads **pause** | |
@@ -74,8 +74,8 @@ Title ──start──▶ Tutorial ──close practice pop-up──▶ Gamepla
 |---|---|
 | **Title** | Desktop, faded "ghost" pop-ups in the background, `imnotavirus.exe` title, **start** button, `Score:` (last round) and `Best:`, taskbar |
 | **Tutorial** | Desktop + recycle bin, one practice pop-up in the center, instruction bar above the taskbar, antivirus progress bar at 0% |
-| **Gameplay** | Desktop + recycle bin, spawning pop-ups, taskbar showing closed count, open count `n/12`, antivirus progress bar and seconds remaining |
-| **Paused** | Gameplay stays visible behind a dimmed overlay. A start-menu-style panel rises from the taskbar start button with a "Paused" header, live rows (pop-ups closed, pop-ups open, seconds left) and a **resume** item |
+| **Gameplay** | Desktop + icons, spawning pop-ups, taskbar showing the antivirus label, striped progress bar, install percentage and clock |
+| **Paused** | Gameplay stays visible behind a dimmed overlay. A start-menu-style panel rises from the taskbar start button with a "Paused" header and live rows (pop-ups closed, pop-ups open, antivirus installed %). The taskbar button, Esc, resume |
 | **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, a "New best" badge when earned, **try again** (goes to Title) |
 | **Success** | Full-screen green parody: `:)`, "Antivirus installed. Your PC survived.", score and best, a "New best" badge when earned, **play again** (goes to Title) |
 
@@ -100,9 +100,8 @@ Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `pa
 - **Score = pop-ups closed this round.** The practice pop-up doesn't count.
 
 ### 5.4 End conditions
+- **Success:** checked first each frame. Once `t >= ROUND_SECONDS` the round is won, even if a burst would have crossed the cap on that same frame — losing after the bar reads 100% feels cheated.
 - **Crash:** checked immediately after each spawn, including each pop-up within a burst. `open >= CAP` ends the round.
-- **Success:** `t >= ROUND_SECONDS` while playing.
-- Crash is checked before success within a frame.
 
 ### 5.5 Persistence (localStorage, wrapped in try/catch)
 `inav.last` holds the most recent finished round's score, `inav.best` the highest ever. `game` is the only module that touches storage; values are held in memory too, so a browser that refuses storage still plays correctly.
@@ -132,7 +131,7 @@ Every knob lives in `js/config.js` — round length, cap, the interval curve, bu
 
 **Tokens are the only way to size chrome.** Border weight comes from `--line` or `--line-thin`, corner radius from `--radius` or a `calc()` on it, and the button press distance from `--press`. This includes inline SVG geometry (`stroke-width`, `rx`) and CSS `outline` widths, so changing one token restyles the whole game. The sanctioned exceptions are `999px` for pills, `50%` for circles, and the taskbar flag's own 2 px squares.
 
-**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up title bars, the dialog/panel title bars and the taskbar. Ink on `--win` measures 5.6:1 and is the required pairing for the win screen and any later "safe" state. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, keep blue-background text at 16 px or larger where possible, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
+**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up title bars, the dialog/panel title bars and the taskbar. White on `--win` measures 5.5:1 and is the pairing the win screen uses. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, text on a blue ground must be 19 px bold or larger (the large-text bar is 18.66 px bold), as the pause rows are, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
 
 **Rules:** flat vector with hard edges and bold outlines. No gradients, textures, realistic shadows, glass, pixel art, serif fonts or thin fonts. The only "shadow" allowed is a hard flat offset block on buttons. The progress bar may use hard-stop diagonal stripes, matching the hatched bar in the sketches. Lighting is flat and even. Honor `prefers-reduced-motion`.
 
@@ -145,14 +144,14 @@ index.html              markup for the stage, screens, taskbar; loads CSS + JS i
 css/
   base.css              palette tokens, reset, #stage scaling, letterbox
   window.css            the anchor pop-up (.win, .popup, animations)
-  desktop.css           desktop icons, taskbar, progress bar, chips
+  desktop.css           desktop icons, taskbar, start button, progress meter, clock
   screens.css           title, tutorial, pause panel, crash and win screens, buttons
 js/
   config.js             INAV.config: every tuning knob + pop-up copy text
   storage.js            INAV.storage: safe localStorage get/set
   stage.js              INAV.stage: fit-to-window scaling, safe-area math
-  popups.js             INAV.popups: create, spawn (with bloom placement), close, clear, count
-  hud.js                INAV.hud: renders taskbar (closed, open n/CAP, progress, seconds, clock)
+  popups.js             INAV.popups: build/spawn typed windows on the spawn grid, close, clear, count, ghost
+  hud.js                INAV.hud: renders the taskbar (antivirus label, progress, install %, start button, clock)
   screens.js            INAV.screens: show(phase, snapshot) maps a phase to its [data-screen] section; per-screen enter logic (title stats, results, lockouts)
   game.js               INAV.game: round state, rAF loop, spawn timer, crash/win detection
   debug.js              INAV.debug: overlay toggled with the D key (t, interval, open, score, screen)
@@ -176,7 +175,7 @@ assets/
 | Double-click / fast clicks on one pop-up | The `.closing` class blocks a second close; the count can't go negative |
 | Clicking a pop-up during `crashing` | Ignored (score/open only change in `play`) |
 | localStorage blocked | try/catch; fall back to in-memory values |
-| Crash and success in the same frame | Crash wins (checked first) |
+| Crash and success in the same frame | Success wins: the timer is checked at the top of the frame |
 
 ## 9. Iteration roadmap
 

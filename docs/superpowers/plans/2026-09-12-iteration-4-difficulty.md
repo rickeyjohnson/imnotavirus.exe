@@ -20,6 +20,8 @@
 
 ### Task 1: Spawn overhaul — harder by 0:30, bursts, spread placement
 
+> **What shipped differs from this task.** Measurement showed the "furthest from the previous pop-up" placement here covered only 54% of the desktop, so it was replaced by grid placement (`SPAWN_GRID`, `SPAWN_JITTER`, least-occupied cell) and `SPAWN_MIN_DISTANCE` / `SPAWN_PLACE_TRIES` were dropped. The tuning values below were also superseded. Read `js/config.js` and `js/popups.js` for what actually ships.
+
 **Files:** Modify `js/config.js`, `js/popups.js`, `js/game.js`
 
 **Interfaces:**
