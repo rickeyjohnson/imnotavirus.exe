@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/desktop.css">
   <link rel="stylesheet" href="css/window.css">
   <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/leaderboard.css">
 </head>
 <body>
   <div id="stage">
@@ -39,6 +40,7 @@
         <h1 class="title-logo">imnotavirus<span class="exe">.exe</span></h1>
         <p class="tagline">Your antivirus needs <span class="copy-seconds">60</span> seconds. The pop-ups need less.</p>
         <button class="btn" id="start-btn" type="button">start</button>
+        <button class="btn small" id="board-btn" type="button">leaderboard</button>
         <div class="stats">
           <span>Score: <strong id="title-last">0</strong></span>
           <span>Best: <strong id="title-best">0</strong></span>
@@ -99,6 +101,33 @@
       <span class="badge" id="crash-new-best" hidden>New best</span>
       <p class="crash-pct"><span id="crash-pct">0</span>% complete</p>
       <button class="btn" id="try-again-btn" type="button">try again</button>
+    </section>
+
+    <section data-screen="board" hidden>
+      <div class="board">
+        <div class="board-bar">
+          <span id="board-heading">leaderboard.exe</span>
+          <button class="board-x" id="board-close" type="button" aria-label="Close leaderboard">✕</button>
+        </div>
+        <div class="board-body">
+          <div class="board-status" id="board-status" hidden></div>
+          <table class="board-table" id="board-table" aria-labelledby="board-heading">
+            <thead>
+              <tr><th class="col-rank" scope="col">rank</th><th scope="col">name</th><th class="col-score" scope="col">closed</th></tr>
+            </thead>
+            <tbody id="board-rows">
+              <tr><td><span class="medal medal-1">1</span></td><td>placeholder</td><td class="col-score">144</td></tr>
+              <tr><td><span class="medal medal-2">2</span></td><td>placeholder</td><td class="col-score">141</td></tr>
+              <tr><td><span class="medal medal-3">3</span></td><td>placeholder</td><td class="col-score">138</td></tr>
+              <tr class="row-mine"><td>4</td><td>placeholder</td><td class="col-score">96</td></tr>
+            </tbody>
+          </table>
+          <div class="board-mine-pin" id="board-mine" hidden></div>
+        </div>
+        <div class="board-foot">
+          <button class="btn small" id="board-back" type="button">back</button>
+        </div>
+      </div>
     </section>
 
     <div id="taskbar">

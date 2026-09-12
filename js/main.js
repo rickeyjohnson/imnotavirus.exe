@@ -9,11 +9,19 @@
   INAV.game.init((phase, s) => INAV.screens.show(phase, s));
 
   $("start-btn").addEventListener("click", () => INAV.game.startTutorial());
+  $("board-btn").addEventListener("click", () => INAV.game.showBoard());
+  $("board-close").addEventListener("click", () => INAV.game.closeBoard());
+  $("board-back").addEventListener("click", () => INAV.game.closeBoard());
   $("try-again-btn").addEventListener("click", () => INAV.game.goTitle());
   $("play-again-btn").addEventListener("click", () => INAV.game.goTitle());
   $("start-menu").addEventListener("click", () => INAV.game.togglePause());
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !e.repeat) INAV.game.togglePause();
+    if (e.key !== "Escape" || e.repeat) return;
+    if (INAV.game.snapshot().phase === "board") {
+      INAV.game.closeBoard();
+      return;
+    }
+    INAV.game.togglePause();
   });
 
   INAV.game.goTitle();

@@ -7,6 +7,13 @@
   --blue: #0078FD;
   --win: #04B550;
 
+  /* Medals. Measured against --ink text: gold 7.78:1, silver 8.13:1,
+     bronze 5.37:1 — all clear of 4.5:1. As fills only; each needs an --ink
+     border because the fills themselves are 1.6-2.3:1 against --paper. */
+  --gold: #FFC400;
+  --silver: #C9D2DC;
+  --bronze: #E09B6B;
+
   --line: 3px;
   --line-thin: 2px;
   --radius: 12px;

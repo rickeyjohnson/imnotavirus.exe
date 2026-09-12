@@ -15,6 +15,7 @@
   };
   let onPhase = function () {};
   let tutorialShown = false;
+  let boardReturn = "title";
 
   // Piecewise ramp: a flat 1/sec through 0:10, 3/sec at 0:30, tightening to the end.
   function interval(t) {
@@ -65,6 +66,20 @@
     resetRound();
     INAV.popups.setEnabled(false);
     setPhase("title");
+  }
+
+  // The board is reachable from the title and from either end screen, so it
+  // remembers where it was opened from rather than always returning to title.
+  function showBoard() {
+    if (state.phase === "board") return;
+    boardReturn = state.phase;
+    INAV.popups.setEnabled(false);
+    setPhase("board");
+  }
+
+  function closeBoard() {
+    if (state.phase !== "board") return;
+    setPhase(boardReturn === "board" ? "title" : boardReturn);
   }
 
   function startTutorial() {
@@ -212,6 +227,8 @@
       requestAnimationFrame(frame);
     },
     goTitle,
+    showBoard,
+    closeBoard,
     startTutorial,
     togglePause,
     handleClose,

@@ -48,7 +48,22 @@ INAV.config = {
   GHOST_OVERLAP_MAX: 0.5,
   PRACTICE_START_DELAY_MS: 250,
 
-  STORAGE_KEYS: { last: "inav.last", best: "inav.best" },
+  STORAGE_KEYS: {
+    last: "inav.last",
+    best: "inav.best",
+    clientId: "inav.clientId",
+    playerName: "inav.playerName",
+    fakeRows: "inav.fakeRows",
+  },
+
+  LEADERBOARD: {
+    VISIBLE: 25,
+    WHEEL_MS: 3000,
+    NAME_MAX: 12,
+    SCORE_MAX: 250,
+    FAKE_LATENCY_MS: { min: 220, max: 650 },
+    SEED_COUNT: 30,
+  },
 
   PRACTICE: {
     title: "practice_popup.exe",

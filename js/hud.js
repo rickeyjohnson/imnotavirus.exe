@@ -7,6 +7,7 @@
     paused: "Antivirus paused",
     crashing: "Antivirus installing…",
     winning: "Antivirus: protected",
+    board: "Antivirus: not installed",
     crash: "Antivirus failed",
     success: "Antivirus: protected",
   };

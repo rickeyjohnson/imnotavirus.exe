@@ -7,6 +7,7 @@
     paused: "paused",
     crashing: "play",
     winning: "play",
+    board: "board",
     crash: "crash",
     success: "success",
   };
@@ -198,11 +199,17 @@
     lockButton($("play-again-btn"), fillAt + C.END_LOCKOUT_MS);
   }
 
+  function enterBoard() {
+    const close = $("board-close");
+    if (close) close.focus();
+  }
+
   const ENTER = {
     title: enterTitle,
     paused: enterPaused,
     crash: enterCrash,
     success: enterSuccess,
+    board: enterBoard,
   };
 
   INAV.screens = {
@@ -228,7 +235,7 @@
         el.hidden = el.dataset.screen !== name;
       });
       const taskbar = document.getElementById("taskbar");
-      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash" || phase === "winning";
+      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash" || phase === "winning" || phase === "board";
       if (ENTER[phase]) ENTER[phase](s);
     },
   };
