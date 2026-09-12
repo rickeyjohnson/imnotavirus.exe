@@ -48,25 +48,20 @@
     const compact = folded.replace(/ /g, "");
     const words = folded.split(" ").filter(Boolean);
 
-    // Spacing a word out is the obvious way past a whole-word filter, so join
-    // runs of single-character tokens: "a s s player" -> ["ass", "player"],
-    // while "bass player" keeps its tokens and stays allowed.
-    const joined = [];
-    let run = "";
-    words.forEach((word) => {
-      if (word.length === 1) {
-        run += word;
-        return;
+    // A blocked word can be spelled across token boundaries ("a ss hole"), so
+    // test every contiguous run of tokens joined together. These are equality
+    // matches, never substring ones: the span "bassplayer" must not match
+    // "ass", which is the whole reason this list is separate.
+    const spans = [];
+    for (let i = 0; i < words.length; i++) {
+      let span = "";
+      for (let j = i; j < words.length; j++) {
+        span += words[j];
+        spans.push(span);
       }
-      if (run) {
-        joined.push(run);
-        run = "";
-      }
-      joined.push(word);
-    });
-    if (run) joined.push(run);
+    }
 
-    const isWord = (w) => words.includes(w) || joined.includes(w) || compact === w;
+    const isWord = (w) => spans.indexOf(w) !== -1;
 
     if (BLOCKED_ANYWHERE.some((w) => compact.includes(w))) return { ok: false, error: "Pick a different name." };
     if (BLOCKED_WORDS.some(isWord)) return { ok: false, error: "Pick a different name." };
