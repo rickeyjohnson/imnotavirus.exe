@@ -130,11 +130,15 @@ Target feel from the GDD: by 0:30 pop-ups arrive noticeably faster; at 0:55 a sk
 | `--ink` | `#273548` | Outlines, text, "downloading" pop-ups, letterbox |
 | `--blue` (accent) | `#0078FD` | Title bars, taskbar, crash screen |
 
-**Anchor asset: the pop-up window.** Every other asset is matched to it:
-- 3 px `--ink` border, 12 px corner radius
-- 38 px `--blue` title bar with a 3 px `--ink` bottom border and bold rounded title text
-- 26 px `--err` X button, 7 px radius, 2 px ink border
-- White body, 15 px medium text, a yellow circular "!" icon, two fake buttons in the footer
+**Anchor asset: the pop-up window.** Every other asset is matched to it (values as built in iteration 3):
+- `--line` (3 px) `--ink` border, `--radius` (12 px) corner radius
+- 34 px `--blue` title bar with a `--line` `--ink` bottom border and bold rounded title text in `--display`
+- 26 px `--err` X button, `calc(--radius / 2)` radius, `--line-thin` (2 px) ink border
+- White body, 14 px text, a yellow circular "!" icon, two fake buttons in the footer
+
+**Tokens are the only way to size chrome.** Border weight comes from `--line` or `--line-thin`, corner radius from `--radius` or a `calc()` on it, and the button press distance from `--press`. This includes inline SVG geometry (`stroke-width`, `rx`) and CSS `outline` widths, so changing one token restyles the whole game. The sanctioned exceptions are `999px` for pills, `50%` for circles, and the taskbar flag's own 2 px squares.
+
+**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up and dialog title bars and the taskbar. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, keep blue-background text at 16 px or larger where possible, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
 
 **Rules:** flat vector with hard edges and bold outlines. No gradients, textures, realistic shadows, glass, pixel art, serif fonts or thin fonts. The only "shadow" allowed is a hard flat offset block on buttons. The progress bar may use hard-stop diagonal stripes, matching the hatched bar in the sketches. Lighting is flat and even. Honor `prefers-reduced-motion`.
 
@@ -385,6 +389,13 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 
 ### Iteration 4: Tuning and feel
 
+**Carried over from the iteration 3 review (do these first):**
+- **`hud.render` runs every frame in every phase.** It now writes the label, seconds, meter, counts and the start button's text, so this is accessibility-tree churn, not just wasted work. Cache the last-rendered values and write only on change. `popups.count()` re-queries the DOM on every one of those frames; fold that in.
+- **The crash shake must compose with the stage transform.** `#stage` already spends `transform` on `translate(-50%, -50%) scale(var(--scale))`, and `stage.fit()` rewrites `--scale` on resize. A shake keyframe that sets `transform` would wipe out the centering and the scale. Add shake offsets as extra tokens inside that same transform, or animate an inner wrapper.
+- **Global reduced-motion coverage.** Only the ghosts honor `prefers-reduced-motion` today. Add one global block in `css/base.css` before adding shake and juice, so new animation is covered by default.
+- **Danger colors.** `--err` can't carry small text (3.2:1 either direction). Show the CRIT state with border weight, the chip fill or the meter, not red text. `--warn` with ink text is safe (11:1).
+
+
 **Goal:** the round matches the GDD's 0:00 / 0:30 / 0:55 beats and feels fast and fun.
 
 **Questions for Rickey**
@@ -415,6 +426,13 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 ---
 
 ### Iteration 5: Variety
+
+**Carried over from the iteration 3 review:**
+- **Child spawns must be driven by `game.step(dt)`, not `setTimeout`.** Pause works by stopping the round's accumulator, so a pop-up that breeds on its own timer would keep breeding through the pause screen.
+- **`popups.create()` takes positional arguments** (`x, y, w, h, title, message`). Pass the `opts` object through before adding a `type` parameter.
+- **`stage.safeArea` can return max < min** once a pop-up type is bigger than the play area. Add a clamp when type sizes vary.
+- **`#popups` covers the desktop icons**, so it swallows clicks over them. That only matters if the Recycle Bin becomes interactive; the fix (`#popups { pointer-events: none }` plus `.popup { pointer-events: auto }`) also lets a click fall through to the pop-up beneath a closing one, which changes the one-click-one-pop-up feel. Decide deliberately.
+
 
 **Goal:** warning (yellow), error (red) and downloading (dark gray) pop-up types.
 
