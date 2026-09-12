@@ -127,8 +127,9 @@
   function enterPaused(s) {
     $("pause-closed").textContent = s.score;
     $("pause-open").textContent = s.open;
-    $("pause-time").textContent = Math.max(0, Math.ceil(C.ROUND_SECONDS - s.t));
-    $("resume-btn").focus();
+    $("pause-progress").textContent = Math.round(Math.min(s.t / C.ROUND_SECONDS, 1) * 100) + "%";
+    const startBtn = $("start-menu");
+    if (startBtn) startBtn.focus();
   }
 
   function enterCrash(s) {

@@ -11,7 +11,6 @@
   $("start-btn").addEventListener("click", () => INAV.game.startTutorial());
   $("try-again-btn").addEventListener("click", () => INAV.game.goTitle());
   $("play-again-btn").addEventListener("click", () => INAV.game.goTitle());
-  $("resume-btn").addEventListener("click", () => INAV.game.togglePause());
   $("start-menu").addEventListener("click", () => INAV.game.togglePause());
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !e.repeat) INAV.game.togglePause();

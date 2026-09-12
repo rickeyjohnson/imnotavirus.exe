@@ -48,8 +48,7 @@
 
     <section data-screen="tutorial" hidden>
       <div class="instruct">
-        <b>Click anywhere on a pop-up</b> to close it. If <b class="copy-cap">12</b> are open at once, your PC crashes.
-        Survive <b><span class="copy-seconds">60</span> seconds</b> while the antivirus installs. Close the practice pop-up to begin.
+        <b>Click anywhere on a pop-up</b> to close it. Don't let too many pile up before the antivirus finishes installing.
       </div>
     </section>
 
@@ -64,10 +63,9 @@
         <ul class="start-menu-rows">
           <li><span>Pop-ups closed</span><strong id="pause-closed">0</strong></li>
           <li><span>Pop-ups open</span><strong id="pause-open">0</strong></li>
-          <li><span>Seconds left</span><strong id="pause-time">60</strong></li>
+          <li><span>Antivirus installed</span><strong id="pause-progress">0%</strong></li>
         </ul>
         <p class="start-menu-hint">Press Esc or the start button to keep going.</p>
-        <button class="start-menu-item" id="resume-btn" type="button">resume</button>
       </div>
     </section>
 
@@ -94,8 +92,6 @@
         <span class="hud-flag" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span id="hud-start-label">start</span>
       </button>
-      <span class="hud-chip">Closed <strong id="hud-closed">0</strong></span>
-      <span class="hud-chip">Open <strong id="hud-open">0</strong>/<span id="hud-cap">12</span></span>
       <span class="hud-av">
         <span id="hud-label">Antivirus: not installed</span>
         <span class="hud-meter"><span class="hud-meter-fill" id="hud-fill"></span></span>

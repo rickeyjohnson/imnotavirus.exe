@@ -280,15 +280,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 9px 12px;
-  background: var(--paper);
-  color: var(--ink);
+  padding: 10px 12px;
+  background: var(--blue);
+  color: var(--paper);
   border-radius: calc(var(--radius) / 3);
   font-size: 15px;
 }
 
 .start-menu-rows strong {
-  font-size: 17px;
+  font-size: 19px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
