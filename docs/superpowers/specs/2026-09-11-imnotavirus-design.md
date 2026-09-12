@@ -46,7 +46,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, filling the sc
 | Crash screen (iter 3 Q4) | Accent blue `#0078FD` | |
 | Title ghosts (iter 3 Q5) | **Pop in and out at random intervals** behind the title | Static under `prefers-reduced-motion` |
 | Win screen (iter 3b) | **Full-screen green `:)`** replacing the success dialog | Mirrors the crash screen, so winning and losing are two sides of the same coin |
-| Green (iter 3b, retuned iter 4) | **`#00873A` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Carries white text at 4.6:1 |
+| Green (iter 3b, retuned iter 4) | **`#04B550` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Carries dark `--ink` text at 4.6:1; a green light enough to please the eye cannot carry white |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
 | Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
 | Difficulty (iter 4) | Peak pressure by **0:30**, not 0:55, plus **random bursts** (a few pop-ups arriving together) | Bursts also make scores differ run to run, which the old fixed curve could not |
@@ -56,7 +56,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, filling the sc
 | Pop-up types (iter 4) | **Warning (yellow), error (red danger), downloading (dark terminal)** plus the plain one | Visual variety now; different behavior stays in iteration 5 |
 | Taskbar (iter 4) | Install **percentage** instead of a seconds countdown; closed/open counts move into the pause panel; the start button reads **pause** | |
 | Pause panel (iter 4) | No resume button (the taskbar button resumes); stat rows use an accent of the panel colour | |
-| Title ghosts (iter 3b, revised) | **14 ghosts anywhere on screen**, built by JS, popping faster | No reserved band: the title block paints over the ghosts, so it stays readable. Ghosts are sized like real pop-ups so their content never clips, and placement rejects piling on an already-placed ghost |
+| Title ghosts (iter 4 final) | **10 ghosts anywhere on screen**, plain type showing the placeholder word "popup" | No reserved band: the title block paints over them. Sized like real pop-ups so nothing clips; placement rejects piling on an already-placed ghost. Placeholder copy keeps the menu quiet next to the typed gameplay pop-ups |
 
 ## 4. Screens and flow
 
@@ -121,7 +121,7 @@ Every knob lives in `js/config.js` — round length, cap, the interval curve, bu
 | `--err` | `#FF0057` | Error pop-ups, X button, critical state |
 | `--ink` | `#273548` | Outlines, text, "downloading" pop-ups, letterbox |
 | `--blue` (accent) | `#0078FD` | Title bars, taskbar, crash screen |
-| `--win` | `#00873A` | Win screen only, always with **white** text (4.6:1). This is the lightest green that keeps white readable at every size; brighter greens force dark text |
+| `--win` | `#04B550` | Win screen only, with **`--ink`** text (4.6:1). Rickey picked this brighter green; white on it is 2.7:1 and is not allowed |
 
 **Anchor asset: the pop-up window.** Every other asset is matched to it (values as built in iteration 3):
 - `--line` (3 px) `--ink` border, `--radius` (12 px) corner radius
@@ -131,7 +131,7 @@ Every knob lives in `js/config.js` — round length, cap, the interval curve, bu
 
 **Tokens are the only way to size chrome.** Border weight comes from `--line` or `--line-thin`, corner radius from `--radius` or a `calc()` on it, and the button press distance from `--press`. This includes inline SVG geometry (`stroke-width`, `rx`) and CSS `outline` widths, so changing one token restyles the whole game. The sanctioned exceptions are `999px` for pills, `50%` for circles, and the taskbar flag's own 2 px squares.
 
-**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up title bars, the dialog/panel title bars and the taskbar. White on `--win` measures 4.6:1 and is the pairing the win screen uses. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, text on a blue ground must be 19 px bold or larger (the large-text bar is 18.66 px bold), as the pause rows are, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
+**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up title bars, the dialog/panel title bars and the taskbar. Ink on `--win` measures 4.6:1 and is the pairing the win screen uses; white on it is only 2.7:1. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, text on a blue ground must be 19 px bold or larger (the large-text bar is 18.66 px bold), as the pause rows are, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
 
 **Rules:** flat vector with hard edges and bold outlines. No gradients, textures, realistic shadows, glass, pixel art, serif fonts or thin fonts. The only "shadow" allowed is a hard flat offset block on buttons. The progress bar may use hard-stop diagonal stripes, matching the hatched bar in the sketches. Lighting is flat and even. Honor `prefers-reduced-motion`.
 
