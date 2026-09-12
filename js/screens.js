@@ -81,17 +81,41 @@
     ];
   }
 
-  function placeGhost(root, r, i, w, h) {
+  function overlapRatio(a, b) {
+    const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+    const h = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+    if (w <= 0 || h <= 0) return 0;
+    return (w * h) / Math.min(a.w * a.h, b.w * b.h);
+  }
+
+  function placeGhost(root, placed, r, i, w, h) {
     const bands = ghostBands(r, w, h);
+    let fallback = null;
 
     // Round-robin the bands so the ghosts ring the title instead of filling the widest gap.
     for (let step = 0; step < bands.length; step++) {
       const band = bands[(i + step) % bands.length];
       if (band.maxX < band.minX || band.maxY < band.minY) continue;
-      const x = Math.round(band.minX + Math.random() * (band.maxX - band.minX));
-      const y = Math.round(band.minY + Math.random() * (band.maxY - band.minY));
-      if (hitsRect(r, x, y, w, h)) continue;
-      root.appendChild(INAV.popups.ghost({ x, y, w, h }));
+
+      for (let tries = 0; tries < C.GHOST_TRIES; tries++) {
+        const box = {
+          x: Math.round(band.minX + Math.random() * (band.maxX - band.minX)),
+          y: Math.round(band.minY + Math.random() * (band.maxY - band.minY)),
+          w: w,
+          h: h,
+        };
+        if (hitsRect(r, box.x, box.y, w, h)) continue;
+        if (!fallback) fallback = box;
+        if (placed.some((other) => overlapRatio(box, other) > C.GHOST_OVERLAP_MAX)) continue;
+        placed.push(box);
+        root.appendChild(INAV.popups.ghost(box));
+        return true;
+      }
+    }
+
+    if (fallback) {
+      placed.push(fallback);
+      root.appendChild(INAV.popups.ghost(fallback));
       return true;
     }
 
@@ -106,11 +130,12 @@
     const g = C.GHOSTS;
     const reserved = reservedRect();
     let dropped = 0;
+    const placed = [];
 
     for (let i = 0; i < g.count; i++) {
       const w = Math.round(g.w.min + Math.random() * (g.w.max - g.w.min));
       const h = Math.round(g.h.min + Math.random() * (g.h.max - g.h.min));
-      if (!placeGhost(root, reserved, i, w, h)) dropped++;
+      if (!placeGhost(root, placed, reserved, i, w, h)) dropped++;
     }
 
     if (dropped > 0) console.warn("ghosts: no room for " + dropped + " of " + g.count);
