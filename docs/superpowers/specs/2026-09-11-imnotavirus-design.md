@@ -45,6 +45,10 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Desktop icons (iter 3 Q3) | Recycle Bin and **antivirus.exe**, plus the fake Windows flag on the taskbar start button | The flag is four palette-colored squares, not Microsoft's mark |
 | Crash screen (iter 3 Q4) | Accent blue `#0078FD` | |
 | Title ghosts (iter 3 Q5) | **Pop in and out at random intervals** behind the title | Static under `prefers-reduced-motion` |
+| Win screen (iter 3b) | **Full-screen green `:)`** replacing the success dialog | Mirrors the crash screen, so winning and losing are two sides of the same coin |
+| Green (iter 3b) | **`#00C853` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Text on it is `--ink` (5.5:1); white on green is 2.2:1 and is not allowed |
+| Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
+| Title ghosts (iter 3b) | **10 ghosts at random spread-out positions**, built by JS | A reserved band keeps the logo, tagline, start button and scores readable |
 
 ## 4. Screens and flow
 
@@ -63,9 +67,9 @@ Title ──start──▶ Tutorial ──close practice pop-up──▶ Gamepla
 | **Title** | Desktop, faded "ghost" pop-ups in the background, `imnotavirus.exe` title, **start** button, `Score:` (last round) and `Best:`, taskbar |
 | **Tutorial** | Desktop + recycle bin, one practice pop-up in the center, instruction bar above the taskbar, antivirus progress bar at 0% |
 | **Gameplay** | Desktop + recycle bin, spawning pop-ups, taskbar showing closed count, open count `n/12`, antivirus progress bar and seconds remaining |
-| **Paused** | Gameplay stays visible behind a dimmed overlay with a "Paused" dialog and a **resume** button |
+| **Paused** | Gameplay stays visible behind a dimmed overlay. A start-menu-style panel rises from the taskbar start button with a "Paused" header, live rows (pop-ups closed, pop-ups open, seconds left) and a **resume** item |
 | **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, a "New best" badge when earned, **try again** (goes to Title) |
-| **Success** | Desktop + recycle bin, a results dialog ("Installation complete"), Score, Best, "New best" badge when earned, **play again** (goes to Title), progress bar full |
+| **Success** | Full-screen green parody: `:)`, "Antivirus installed. Your PC survived.", score and best, a "New best" badge when earned, **play again** (goes to Title) |
 
 Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `success`.
 
@@ -129,6 +133,7 @@ Target feel from the GDD: by 0:30 pop-ups arrive noticeably faster; at 0:55 a sk
 | `--err` | `#FF0057` | Error pop-ups, X button, critical state |
 | `--ink` | `#273548` | Outlines, text, "downloading" pop-ups, letterbox |
 | `--blue` (accent) | `#0078FD` | Title bars, taskbar, crash screen |
+| `--win` | `#00C853` | Win screen only (added in iteration 3b; always with `--ink` text) |
 
 **Anchor asset: the pop-up window.** Every other asset is matched to it (values as built in iteration 3):
 - `--line` (3 px) `--ink` border, `--radius` (12 px) corner radius
@@ -384,6 +389,39 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 - [ ] Ghost pop-ups come and go on the Title and never block the start button.
 - [ ] The start button reads "resume" while paused.
 - [ ] No color outside the six palette tokens appears anywhere (the pause dim is ink with alpha).
+
+---
+
+### Iteration 3b: Pause menu, ghost spread, win screen
+
+**Goal:** three changes Rickey asked for after playing the art pass.
+
+**Start-menu pause panel**
+- **What:** pausing opens a panel anchored above the taskbar start button, parodying the Windows start menu, instead of a centered dialog.
+- **How:** the `paused` screen holds the panel; `screens.enterPaused(s)` fills its rows from the snapshot (closed, open, seconds left) and focuses the resume item. The dim overlay and every pause rule from iteration 2 stay exactly as they are.
+- **Knobs:** none beyond the existing pause behavior.
+- **Test:** pause at about 0:20 and the rows match the taskbar; Esc, the start button and the resume item all continue the round.
+- **Broken:** the panel floats detached from the taskbar, covers the start button, or shows stale numbers.
+
+**Ten spread-out ghosts**
+- **What:** the Title's decorative pop-ups go from five fixed positions to ten random ones.
+- **How:** `screens` builds them on entering the Title, using the same window markup as real pop-ups, placing each one in the safe area but outside a reserved band behind the logo, tagline, start button and scores.
+- **Knobs:** `GHOSTS` (count and size range) and `GHOST_RESERVED` (the protected band).
+- **Test:** reload the Title several times; ten ghosts, different every time, and the title text always readable.
+- **Broken:** ghosts overlap the logo, clump in one corner, or spill off-screen.
+
+**Win screen**
+- **What:** surviving 60 seconds shows a full-screen green `:)`, the twin of the crash screen.
+- **How:** the `success` screen becomes full-bleed `--win` with `--ink` text, score, best, the "New best" badge and **play again**. Everything about the flow stays the same.
+- **Knobs:** none.
+- **Test:** win a shortened round; the screen is green with dark text, and play again returns to the Title.
+- **Broken:** white text on green (2.2:1), or the screen failing to cover the taskbar the way the crash screen does.
+
+**Manual test checklist**
+- [ ] The pause panel sits above the start button, its numbers match the taskbar, and all three ways to resume work.
+- [ ] Ten ghosts, newly placed on each visit to the Title, never covering the title text.
+- [ ] Winning shows the green `:)` screen with dark text; losing still shows the blue one.
+- [ ] "New best" still appears only when the record is beaten.
 
 ---
 
