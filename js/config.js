@@ -29,8 +29,8 @@ INAV.config = {
   CRASH_PCT_STEP_MAX: 9,
   CLOCK_TICK_MS: 10000,
   GHOST_TOGGLE_MS: { min: 500, max: 1600 },
-  GHOSTS: { count: 10, w: { min: 150, max: 220 }, h: { min: 130, max: 160 } },
-  GHOST_RESERVED: { x: 320, y: 165, w: 640, h: 325 },
+  GHOSTS: { count: 10, w: { min: 150, max: 200 }, h: { min: 110, max: 140 } },
+  GHOST_RESERVED: { x: 330, y: 175, w: 620, h: 310 },
   PRACTICE_START_DELAY_MS: 250,
 
   STORAGE_KEYS: { last: "inav.last", best: "inav.best" },

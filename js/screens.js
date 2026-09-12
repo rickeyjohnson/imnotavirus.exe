@@ -24,6 +24,17 @@
     return x < r.x + r.w && x + w > r.x && y < r.y + r.h && y + h > r.y;
   }
 
+
+  function ghostBands(w, h) {
+    const r = C.GHOST_RESERVED;
+    const a = INAV.stage.safeArea(w, h);
+    return [
+      { minX: a.minX, maxX: a.maxX, minY: a.minY, maxY: Math.min(a.maxY, r.y - h) },
+      { minX: Math.max(a.minX, r.x + r.w), maxX: a.maxX, minY: a.minY, maxY: a.maxY },
+      { minX: a.minX, maxX: a.maxX, minY: Math.max(a.minY, r.y + r.h), maxY: a.maxY },
+      { minX: a.minX, maxX: Math.min(a.maxX, r.x - w), minY: a.minY, maxY: a.maxY },
+    ];
+  }
   function buildGhosts() {
     const root = ghostsRoot();
     if (!root) return;
@@ -33,15 +44,19 @@
     for (let i = 0; i < g.count; i++) {
       const w = Math.round(g.w.min + Math.random() * (g.w.max - g.w.min));
       const h = Math.round(g.h.min + Math.random() * (g.h.max - g.h.min));
-      const area = INAV.stage.safeArea(w, h);
+      const bands = ghostBands(w, h);
 
-      for (let tries = 0; tries < 40; tries++) {
-        const x = Math.round(area.minX + Math.random() * (area.maxX - area.minX));
-        const y = Math.round(area.minY + Math.random() * (area.maxY - area.minY));
+      // Round-robin the bands so the ghosts ring the title instead of filling the widest gap.
+      for (let step = 0; step < bands.length; step++) {
+        const band = bands[(i + step) % bands.length];
+        if (band.maxX < band.minX || band.maxY < band.minY) continue;
+        const x = Math.round(band.minX + Math.random() * (band.maxX - band.minX));
+        const y = Math.round(band.minY + Math.random() * (band.maxY - band.minY));
         if (hitsReserved(x, y, w, h)) continue;
         root.appendChild(INAV.popups.ghost({ x, y, w, h }));
         break;
       }
+
     }
   }
 
