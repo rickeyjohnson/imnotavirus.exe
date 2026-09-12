@@ -50,21 +50,48 @@ INAV.config = {
   WARN_AT: 7,
   CRIT_AT: 10,
 
-  TITLES: [
-    "WARNING.exe", "FreeRAM_Download", "YOU_WON!!!.exe", "System Alert", "toolbar_setup.exe",
-    "Congratulations!", "hot_deals.exe", "PC_Cleaner_Pro", "Update Required", "definitely_safe.zip",
-  ],
-  MESSAGES: [
-    "Your PC is running SLOW! Click to fix now.",
-    "You are visitor #1,000,000! Claim your prize.",
-    "Download 16GB more RAM for free!",
-    "3 viruses found. Install cleaner?",
-    "Your toolbar is out of date.",
-    "Limited offer: 99% off a new mouse!",
-    "Warning: low disk vibes detected.",
-    "Allow notifications? (you have no choice)",
-    "Your warranty is expiring. Probably.",
-    "A new update is ready. And another.",
+  POPUP_TYPES: [
+    {
+      id: "plain",
+      weight: 4,
+      titles: ["System Alert", "Congratulations!", "hot_deals.exe", "toolbar_setup.exe"],
+      messages: [
+        "You are visitor #1,000,000!",
+        "Your toolbar is out of date.",
+        "99% off a new mouse!",
+        "Allow notifications?",
+      ],
+    },
+    {
+      id: "warning",
+      weight: 3,
+      titles: ["WARNING.exe", "Low Disk Space", "Update Required"],
+      messages: [
+        "Your PC is running SLOW!",
+        "Low disk vibes detected.",
+        "Your warranty is expiring.",
+      ],
+    },
+    {
+      id: "error",
+      weight: 2,
+      titles: ["CRITICAL ERROR", "virus_found.exe", "SECURITY ALERT"],
+      messages: [
+        "3 viruses found. Clean now?",
+        "Your files are at risk!",
+        "Unauthorized access detected.",
+      ],
+    },
+    {
+      id: "download",
+      weight: 2,
+      titles: ["definitely_safe.zip", "FreeRAM_Download", "setup_1.exe"],
+      messages: [
+        "> downloading payload...",
+        "> unpacking 16GB of RAM...",
+        "> installing 4 toolbars...",
+      ],
+    },
   ],
 
   BUTTONS: [
