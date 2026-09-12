@@ -45,8 +45,8 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, filling the sc
 | Desktop icons (iter 3 Q3) | Recycle Bin and **antivirus.exe**, plus the fake Windows flag on the taskbar start button | The flag is four palette-colored squares, not Microsoft's mark |
 | Crash screen (iter 3 Q4) | Accent blue `#0078FD` | |
 | Title ghosts (iter 3 Q5) | **Pop in and out at random intervals** behind the title | Static under `prefers-reduced-motion` |
-| Win screen (iter 3b) | **Full-screen green `:)`** replacing the success dialog | Mirrors the crash screen, so winning and losing are two sides of the same coin |
-| Green (iter 3b, retuned iter 4) | **`#04B550` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Carries dark `--ink` text at 4.6:1; a green light enough to please the eye cannot carry white |
+| Win screen (iter 4 final) | **A finished setup wizard on the cleared desktop** | "Installation complete", three ticked steps, a full bar, score and best, and a **finish** button. Chosen over a green takeover: the player sees the clean desktop they fought for, the taskbar still reads 100% / protected, and it pays off the 60-second install premise |
+| Green (iter 3b, retuned iter 4) | **`#04B550` added as a sixth value**, a deliberate GDD amendment | Now used only for the wizard's tick badges. Three attempts at green-with-white text all failed contrast, which is why the win screen became a wizard instead |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
 | Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
 | Difficulty (iter 4) | Peak pressure by **0:30**, not 0:55, plus **random bursts** (a few pop-ups arriving together) | Bursts also make scores differ run to run, which the old fixed curve could not |
@@ -77,7 +77,7 @@ Title ──start──▶ Tutorial ──close practice pop-up──▶ Gamepla
 | **Gameplay** | Desktop + icons, spawning pop-ups, taskbar showing the antivirus label, striped progress bar, install percentage and clock |
 | **Paused** | Gameplay stays visible behind a dimmed overlay. A start-menu-style panel rises from the taskbar start button with a "Paused" header and live rows (pop-ups closed, pop-ups open, antivirus installed %). The taskbar button, Esc, resume |
 | **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, a "New best" badge when earned, **try again** (goes to Title) |
-| **Success** | Full-screen green parody: `:)`, "Antivirus installed. Your PC survived.", score and best, a "New best" badge when earned, **play again** (goes to Title) |
+| **Success** | The desktop, cleared of pop-ups, with a finished setup wizard: "Installation complete", three ticked steps, a full striped bar, Closed/Best, a "New best" badge when earned, and **finish** (goes to Title). The taskbar stays visible reading 100% |
 
 Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `success`.
 
@@ -121,7 +121,7 @@ Every knob lives in `js/config.js` — round length, cap, the interval curve, bu
 | `--err` | `#FF0057` | Error pop-ups, X button, critical state |
 | `--ink` | `#273548` | Outlines, text, "downloading" pop-ups, letterbox |
 | `--blue` (accent) | `#0078FD` | Title bars, taskbar, crash screen |
-| `--win` | `#04B550` | Win screen only, with **`--ink`** text (4.6:1). Rickey picked this brighter green; white on it is 2.7:1 and is not allowed |
+| `--win` | `#04B550` | The wizard's tick badges, with `--ink` marks (4.6:1). Green never carries text of its own |
 
 **Anchor asset: the pop-up window.** Every other asset is matched to it (values as built in iteration 3):
 - `--line` (3 px) `--ink` border, `--radius` (12 px) corner radius
@@ -131,7 +131,7 @@ Every knob lives in `js/config.js` — round length, cap, the interval curve, bu
 
 **Tokens are the only way to size chrome.** Border weight comes from `--line` or `--line-thin`, corner radius from `--radius` or a `calc()` on it, and the button press distance from `--press`. This includes inline SVG geometry (`stroke-width`, `rx`) and CSS `outline` widths, so changing one token restyles the whole game. The sanctioned exceptions are `999px` for pills, `50%` for circles, and the taskbar flag's own 2 px squares.
 
-**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up title bars, the dialog/panel title bars and the taskbar. Ink on `--win` measures 4.6:1 and is the pairing the win screen uses; white on it is only 2.7:1. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, text on a blue ground must be 19 px bold or larger (the large-text bar is 18.66 px bold), as the pause rows are, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
+**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up title bars, the dialog/panel title bars and the taskbar. Ink on `--win` measures 4.6:1, which is why the wizard's tick marks are ink; white on that green is only 2.7:1. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, text on a blue ground must be 19 px bold or larger (the large-text bar is 18.66 px bold), as the pause rows are, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
 
 **Rules:** flat vector with hard edges and bold outlines. No gradients, textures, realistic shadows, glass, pixel art, serif fonts or thin fonts. The only "shadow" allowed is a hard flat offset block on buttons. The progress bar may use hard-stop diagonal stripes, matching the hatched bar in the sketches. Lighting is flat and even. Honor `prefers-reduced-motion`.
 
