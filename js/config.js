@@ -10,12 +10,12 @@ INAV.config = {
 
   FIRST_SPAWN_MS: 600,
   INTERVAL_START_MS: 1000,
-  INTERVAL_END_MS: 260,
+  INTERVAL_END_MS: 300,
   INTERVAL_CURVE: 0.55,
   MAX_DT_MS: 100,
 
   BURST_GAP_S: { min: 3, max: 6 },
-  BURST_SIZE: { start: 2, end: 7 },
+  BURST_SIZE: { start: 2, end: 5 },
   SPAWN_MIN_DISTANCE: 420,
   SPAWN_PLACE_TRIES: 14,
 
