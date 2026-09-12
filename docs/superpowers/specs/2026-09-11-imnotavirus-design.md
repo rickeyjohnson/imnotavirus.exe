@@ -46,7 +46,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Crash screen (iter 3 Q4) | Accent blue `#0078FD` | |
 | Title ghosts (iter 3 Q5) | **Pop in and out at random intervals** behind the title | Static under `prefers-reduced-motion` |
 | Win screen (iter 3b) | **Full-screen green `:)`** replacing the success dialog | Mirrors the crash screen, so winning and losing are two sides of the same coin |
-| Green (iter 3b) | **`#00C853` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Text on it is `--ink` (5.5:1); white on green is 2.2:1 and is not allowed |
+| Green (iter 3b, deepened iter 4) | **`#007A33` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Carries white text at 5.5:1 |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
 | Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
 | Difficulty (iter 4) | Peak pressure by **0:30**, not 0:55, plus **random bursts** (a few pop-ups arriving together) | Bursts also make scores differ run to run, which the old fixed curve could not |
@@ -122,7 +122,7 @@ Every knob lives in `js/config.js` — round length, cap, the interval curve, bu
 | `--err` | `#FF0057` | Error pop-ups, X button, critical state |
 | `--ink` | `#273548` | Outlines, text, "downloading" pop-ups, letterbox |
 | `--blue` (accent) | `#0078FD` | Title bars, taskbar, crash screen |
-| `--win` | `#00C853` | Win screen only (added in iteration 3b; always with `--ink` text) |
+| `--win` | `#007A33` | Win screen only. Deepened in iteration 4 so it carries **white** text (5.5:1); the brighter `#00C853` could only take dark text |
 
 **Anchor asset: the pop-up window.** Every other asset is matched to it (values as built in iteration 3):
 - `--line` (3 px) `--ink` border, `--radius` (12 px) corner radius
