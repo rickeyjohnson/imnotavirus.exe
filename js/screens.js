@@ -65,7 +65,17 @@
 
     const chosen = best || fallback;
     placed.push(chosen);
-    root.appendChild(INAV.popups.ghost(chosen));
+    root.appendChild(
+      INAV.popups.ghost({
+        x: chosen.x,
+        y: chosen.y,
+        w: chosen.w,
+        h: chosen.h,
+        type: "plain",
+        title: C.GHOST_COPY.title,
+        message: C.GHOST_COPY.message,
+      })
+    );
   }
 
   function buildGhosts() {
