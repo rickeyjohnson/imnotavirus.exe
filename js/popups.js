@@ -11,7 +11,7 @@
 
   const X_MARK =
     '<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">' +
-    '<path d="M2 2l8 8M10 2l-8 8" stroke="var(--paper)" stroke-width="2.6" stroke-linecap="round"/></svg>';
+    '<path d="M2 2l8 8M10 2l-8 8" stroke="var(--paper)" stroke-width="var(--line-thin)" stroke-linecap="round"/></svg>';
 
   function live() {
     return layer.querySelectorAll(".popup:not(.closing)");
@@ -28,7 +28,7 @@
 
     el.innerHTML =
       '<div class="popup-bar"><span class="popup-title"></span><span class="popup-x">' + X_MARK + "</span></div>" +
-      '<div class="popup-body"><span class="popup-icon">!</span><span class="popup-text"></span></div>' +
+      '<div class="popup-body"><span class="popup-icon" aria-hidden="true">!</span><span class="popup-text"></span></div>' +
       '<div class="popup-foot"><span class="popup-fake"></span><span class="popup-fake primary"></span></div>';
 
     el.querySelector(".popup-title").textContent = title;

@@ -18,7 +18,7 @@ INAV.config = {
   BLOOM_OFFSET: { x: 150, y: 110 },
 
   POPUP_W: { min: 240, max: 300 },
-  POPUP_H: { min: 140, max: 160 },
+  POPUP_H: { min: 155, max: 175 },
   SAFE: { left: 130, top: 16, right: 16, bottom: 16 },
 
   CLOSE_ANIM_MS: 100,

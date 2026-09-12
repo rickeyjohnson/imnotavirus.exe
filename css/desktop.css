@@ -69,8 +69,8 @@
 }
 
 .hud-start:focus-visible {
-  outline: 3px solid var(--warn);
-  outline-offset: -3px;
+  outline: var(--line) solid var(--warn);
+  outline-offset: calc(-1 * var(--line));
 }
 
 .hud-flag {

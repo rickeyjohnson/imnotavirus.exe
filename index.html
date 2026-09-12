@@ -15,17 +15,17 @@
     <div id="icon-column">
       <div class="desktop-icon">
         <svg viewBox="0 0 56 56" width="52" height="52" aria-hidden="true">
-          <path d="M23 7h10" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
-          <rect x="9" y="11" width="38" height="9" rx="4" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/>
-          <path d="M13 20h30l-3 28a4 4 0 0 1-4 3.5H20a4 4 0 0 1-4-3.5z" fill="var(--paper)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
-          <path d="M23 27v17M33 27v17" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M23 7h10" fill="none" stroke="var(--ink)" stroke-width="var(--line)" stroke-linecap="round"/>
+          <rect x="9" y="11" width="38" height="9" rx="calc(var(--radius) / 3)" fill="var(--paper)" stroke="var(--ink)" stroke-width="var(--line)"/>
+          <path d="M13 20h30l-3 28a4 4 0 0 1-4 3.5H20a4 4 0 0 1-4-3.5z" fill="var(--paper)" stroke="var(--ink)" stroke-width="var(--line)" stroke-linejoin="round"/>
+          <path d="M23 27v17M33 27v17" fill="none" stroke="var(--ink)" stroke-width="var(--line)" stroke-linecap="round"/>
         </svg>
         <span>Recycle Bin</span>
       </div>
       <div class="desktop-icon">
         <svg viewBox="0 0 56 56" width="52" height="52" aria-hidden="true">
-          <path d="M28 5l19 7v14c0 13-8 21-19 26C17 47 9 39 9 26V12z" fill="var(--blue)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
-          <path d="M19 28l7 7 12-13" fill="none" stroke="var(--paper)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M28 5l19 7v14c0 13-8 21-19 26C17 47 9 39 9 26V12z" fill="var(--blue)" stroke="var(--ink)" stroke-width="var(--line)" stroke-linejoin="round"/>
+          <path d="M19 28l7 7 12-13" fill="none" stroke="var(--paper)" stroke-width="var(--line)" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span>antivirus.exe</span>
       </div>
@@ -88,7 +88,7 @@
     </section>
 
     <section data-screen="crash" hidden>
-      <div class="crash-face">:(</div>
+      <div class="crash-face" aria-hidden="true">:(</div>
       <h2>Your PC ran into a problem and needs to restart.</h2>
       <p><span class="copy-cap">12</span> pop-ups were open at once. You closed <strong id="crash-score">0</strong> before it happened (best: <strong id="crash-best">0</strong>), and the antivirus was <strong id="crash-progress">0</strong>% installed.</p>
       <span class="badge" id="crash-new-best" hidden>New best</span>
@@ -97,7 +97,7 @@
     </section>
 
     <div id="taskbar">
-      <button class="hud-start" id="start-menu" type="button" title="Pause (Esc)" aria-pressed="false">
+      <button class="hud-start" id="start-menu" type="button" title="Pause (Esc)">
         <span class="hud-flag" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span id="hud-start-label">start</span>
       </button>

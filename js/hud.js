@@ -42,9 +42,11 @@
       els.fill.style.width = progress * 100 + "%";
       els.label.textContent = LABELS[s.phase];
       els.time.textContent = done ? "✓" : Math.max(0, Math.ceil(C.ROUND_SECONDS - s.t)) + "s";
-      els.startLabel.textContent = paused ? "resume" : "start";
-      els.startBtn.title = paused ? "Resume (Esc)" : "Pause (Esc)";
-      els.startBtn.setAttribute("aria-pressed", paused ? "true" : "false");
+      const startLabel = paused ? "resume" : "start";
+      if (els.startLabel.textContent !== startLabel) {
+        els.startLabel.textContent = startLabel;
+        els.startBtn.title = paused ? "Resume (Esc)" : "Pause (Esc)";
+      }
     },
   };
 })();

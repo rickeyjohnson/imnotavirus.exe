@@ -100,7 +100,7 @@
   color: var(--ink);
   border: var(--line) solid var(--ink);
   border-radius: var(--radius);
-  box-shadow: 0 6px 0 var(--ink);
+  box-shadow: 0 var(--press) 0 var(--ink);
   font-family: var(--display);
   font-size: 28px;
   font-weight: 600;
@@ -113,13 +113,14 @@
 }
 
 .btn:active {
-  transform: translateY(6px);
+  transform: translateY(var(--press));
   box-shadow: 0 0 0 var(--ink);
 }
 
 .btn:focus-visible {
-  outline: 4px solid var(--warn);
-  outline-offset: 4px;
+  outline: var(--line) solid var(--ink);
+  outline-offset: var(--line);
+  background: var(--warn);
 }
 
 .btn:disabled {
