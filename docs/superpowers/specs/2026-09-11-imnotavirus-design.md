@@ -49,8 +49,8 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, filling the sc
 | Green (iter 3b, retuned iter 4) | **`#04B550` added as a sixth value**, a deliberate GDD amendment | Now used only for the wizard's tick badges. Three attempts at green-with-white text all failed contrast, which is why the win screen became a wizard instead |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
 | Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
-| Difficulty (iter 4) | Peak pressure by **0:30**, not 0:55, plus **random bursts** (a few pop-ups arriving together) | Bursts also make scores differ run to run, which the old fixed curve could not |
-| Cap (iter 4) | **24 open pop-ups**, with pop-ups sized so the cap covers **85-95%** of the desktop | The old cap of 12 covered ~63%, so losing looked less overrun than the menu |
+| Difficulty (iter 4, retuned after playtest) | A keyframed ramp: about **1 pop-up a second until 0:15**, **2.5 a second by 0:30**, tightening to the end. One pop-up at a time, with the gap **jittered ±30%** | Rickey found the burst version too hard, and disliked several pop-ups appearing at the same instant. The jitter keeps rounds from being identical, which is what stops every win scoring the same |
+| Cap (iter 4, retuned) | **18 open pop-ups** on a 6×3 grid, sized so the cap covers **88-89%** of the desktop (measured) | The original cap of 12 covered only ~63%, so losing looked less overrun than the menu |
 | Spawn placement (iter 4) | Pop-ups take the **least-occupied cell of a 6×4 grid** with a few pixels of jitter; Title ghosts use furthest-from-the-last placement | Replaces bloom-adjacency clustering. Grid placement is what makes a capped screen read as 90% full; bloom now means the screen filling, not clumps growing |
 | Tutorial (iter 4) | **Once per page session** (a refresh shows it again; retries in the same session skip it) | Testers never needed it twice; retrying through it was friction |
 | Pop-up types (iter 4) | **Warning (yellow), error (red danger), downloading (dark terminal)** plus the plain one | Visual variety now; different behavior stays in iteration 5 |
@@ -90,8 +90,8 @@ Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `pa
 
 ### 5.2 Spawning
 - The first pop-up lands at **0.6 s**.
-- The steady interval eases down across the round: `interval(t) = START − (START − END) · (t/60)^CURVE`, tuned so pressure peaks around **0:30** rather than the final seconds.
-- **Bursts:** every few seconds a clump of pop-ups arrives at once, growing over the round. Bursts are what make two rounds differ, so scores vary.
+- The gap between spawns follows `SPAWN_RAMP`, a short list of keyframes interpolated over the round: gentle until 0:15, steep through 0:30, tightening to the end. Reshaping difficulty means editing that list, nothing else.
+- Only ever **one pop-up at a time**; the gap between spawns is jittered ±`SPAWN_JITTER_PCT`, which is what makes two rounds differ so scores vary.
 - **Grid placement:** the desktop is divided into a coarse grid; each pop-up takes the least-occupied cell with a few pixels of jitter. Spread placement is what lets a capped screen actually look full (measured 90% covered at the cap).
 - The loop uses `requestAnimationFrame` with `dt` clamped, so a hidden tab can't dump a burst on return.
 
@@ -101,13 +101,13 @@ Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `pa
 
 ### 5.4 End conditions
 - **Success:** checked first each frame. Once `t >= ROUND_SECONDS` the round is won, even if a burst would have crossed the cap on that same frame — losing after the bar reads 100% feels cheated.
-- **Crash:** checked immediately after each spawn, including each pop-up within a burst. `open >= CAP` ends the round.
+- **Crash:** checked immediately after each spawn. `open >= CAP` ends the round.
 
 ### 5.5 Persistence (localStorage, wrapped in try/catch)
 `inav.last` holds the most recent finished round's score, `inav.best` the highest ever. `game` is the only module that touches storage; values are held in memory too, so a browser that refuses storage still plays correctly.
 
 ### 5.6 Tuning
-Every knob lives in `js/config.js` — round length, cap, the interval curve, burst gaps and sizes, pop-up sizes, the spawn grid, ghost behaviour and every delay. Read that file for current values rather than duplicating them here. Balance target, measured with a simulated player: ~2 clicks/second dies around 0:45, ~2.5 is roughly a coin flip, ~3 survives.
+Every knob lives in `js/config.js` — round length, cap, the interval curve, burst gaps and sizes, pop-up sizes, the spawn grid, ghost behaviour and every delay. Read that file for current values rather than duplicating them here. Balance target, measured with a simulated player: ~1.6 clicks/second dies around 0:50, ~1.9 is roughly a coin flip, ~2 survives. An unattended round crashes at about 0:18.
 
 
 ## 6. Art direction (from the GDD)
@@ -192,7 +192,7 @@ Each iteration ships something playable, gets hand-tested against its checklist,
 | 2 | Screen flow: title, tutorial, pause, crash, success; saved scores; one phase machine | `plans/2026-09-11-iteration-2-screen-flow.md` |
 | 3 | Art pass: local fonts, design tokens, the anchor pop-up, desktop icons, taskbar, screen art | `plans/2026-09-11-iteration-3-art-pass.md` |
 | 3b | Green win screen, start-menu pause panel, scattered title ghosts | `plans/2026-09-11-iteration-3b-polish.md` |
-| 4 | Playtest response: harder by 0:30, bursts, cap 24 at ~90% coverage, four pop-up types, install percentage, per-session tutorial | `plans/2026-09-12-iteration-4-difficulty.md` |
+| 4 | Playtest response: keyframed ramp (gentle to 0:15, hard by 0:30), cap 18 at ~88% coverage, four pop-up types, install percentage, per-session tutorial, setup-wizard win screen | `plans/2026-09-12-iteration-4-difficulty.md` |
 
 ### Iteration 5: Variety with behaviour
 
