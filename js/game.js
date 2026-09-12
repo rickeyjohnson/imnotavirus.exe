@@ -6,6 +6,8 @@
     score: 0,
     spawnAcc: 0,
     nextSpawnIn: C.FIRST_SPAWN_MS,
+    burstIn: 0,
+    burstArmed: false,
     lastFrame: 0,
     result: null,
     scores: {
@@ -43,6 +45,8 @@
     state.score = 0;
     state.spawnAcc = 0;
     state.nextSpawnIn = C.FIRST_SPAWN_MS;
+    state.burstIn = C.BURST_GAP_S.min * 1000;
+    state.burstArmed = true;
     state.result = null;
   }
 
@@ -134,6 +138,12 @@
     if (state.phase === "play") state.score++;
   }
 
+  function burstSize(t) {
+    const p = Math.min(Math.max(t / C.ROUND_SECONDS, 0), 1);
+    const mid = C.BURST_SIZE.start + (C.BURST_SIZE.end - C.BURST_SIZE.start) * p;
+    return Math.max(1, Math.round(mid - 1 + Math.random() * 3));
+  }
+
   function step(dt) {
     state.t += dt / 1000;
     state.spawnAcc += dt;
@@ -146,6 +156,20 @@
         crash();
         return;
       }
+    }
+
+    state.burstIn -= dt;
+    if (state.burstArmed && state.burstIn <= 0) {
+      const count = burstSize(state.t);
+      for (let i = 0; i < count; i++) {
+        INAV.popups.spawn();
+        if (INAV.popups.count() >= C.CAP) {
+          crash();
+          return;
+        }
+      }
+      const gap = C.BURST_GAP_S;
+      state.burstIn = (gap.min + Math.random() * (gap.max - gap.min)) * 1000;
     }
 
     if (state.t >= C.ROUND_SECONDS) succeed();

@@ -4,6 +4,7 @@
   let onClose = function () {};
   let enabled = false;
   let z = 0;
+  let lastSpawn = null;
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -57,19 +58,31 @@
     let y = opts.y;
 
     if (x === undefined || y === undefined) {
-      x = rand(area.minX, area.maxX);
-      y = rand(area.minY, area.maxY);
+      let best = null;
+      let bestGap = -1;
 
-      const open = live();
-      if (open.length > 0 && Math.random() < C.BLOOM_CHANCE) {
-        const source = pick(open);
-        x = parseFloat(source.style.left) + rand(-C.BLOOM_OFFSET.x, C.BLOOM_OFFSET.x);
-        y = parseFloat(source.style.top) + rand(-C.BLOOM_OFFSET.y, C.BLOOM_OFFSET.y);
+      // Push each pop-up away from the one before it, so they fill the desktop
+      // instead of clustering where the player is already looking.
+      for (let tries = 0; tries < C.SPAWN_PLACE_TRIES; tries++) {
+        const cx = rand(area.minX, area.maxX);
+        const cy = rand(area.minY, area.maxY);
+        const gap = lastSpawn
+          ? Math.hypot(cx + w / 2 - lastSpawn.x, cy + h / 2 - lastSpawn.y)
+          : Infinity;
+        if (gap > bestGap) {
+          bestGap = gap;
+          best = { x: cx, y: cy };
+        }
+        if (gap >= C.SPAWN_MIN_DISTANCE) break;
       }
+
+      x = best.x;
+      y = best.y;
     }
 
     x = Math.round(clamp(x, area.minX, area.maxX));
     y = Math.round(clamp(y, area.minY, area.maxY));
+    lastSpawn = { x: x + w / 2, y: y + h / 2 };
 
     const el = create(x, y, w, h, opts.title || pick(C.TITLES), opts.message || pick(C.MESSAGES));
     if (opts.practice) el.dataset.practice = "1";
@@ -111,6 +124,7 @@
     clear() {
       layer.replaceChildren();
       z = 0;
+      lastSpawn = null;
     },
     setEnabled(on) {
       enabled = on;

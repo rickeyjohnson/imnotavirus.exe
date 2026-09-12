@@ -5,20 +5,22 @@ INAV.config = {
   STAGE_H: 720,
   TASKBAR_H: 56,
 
-  CAP: 12,
+  CAP: 24,
   ROUND_SECONDS: 60,
 
   FIRST_SPAWN_MS: 600,
-  INTERVAL_START_MS: 1100,
-  INTERVAL_END_MS: 360,
-  INTERVAL_CURVE: 1.15,
+  INTERVAL_START_MS: 1000,
+  INTERVAL_END_MS: 260,
+  INTERVAL_CURVE: 0.55,
   MAX_DT_MS: 100,
 
-  BLOOM_CHANCE: 0.45,
-  BLOOM_OFFSET: { x: 150, y: 110 },
+  BURST_GAP_S: { min: 3, max: 6 },
+  BURST_SIZE: { start: 2, end: 7 },
+  SPAWN_MIN_DISTANCE: 420,
+  SPAWN_PLACE_TRIES: 14,
 
-  POPUP_W: { min: 240, max: 300 },
-  POPUP_H: { min: 155, max: 175 },
+  POPUP_W: { min: 195, max: 235 },
+  POPUP_H: { min: 150, max: 170 },
   SAFE: { left: 130, top: 16, right: 16, bottom: 16 },
 
   CLOSE_ANIM_MS: 100,
