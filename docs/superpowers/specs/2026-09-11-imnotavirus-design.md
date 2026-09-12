@@ -48,6 +48,14 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Win screen (iter 3b) | **Full-screen green `:)`** replacing the success dialog | Mirrors the crash screen, so winning and losing are two sides of the same coin |
 | Green (iter 3b) | **`#00C853` added as a sixth value**, a deliberate GDD amendment | Win screen only, and any later "safe" state. Text on it is `--ink` (5.5:1); white on green is 2.2:1 and is not allowed |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
+| Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
+| Difficulty (iter 4) | Peak pressure by **0:30**, not 0:55, plus **random bursts** (a few pop-ups arriving together) | Bursts also make scores differ run to run, which the old fixed curve could not |
+| Cap (iter 4) | **24 open pop-ups**, with pop-ups sized so the cap covers **85-95%** of the desktop | The old cap of 12 covered ~63%, so losing looked less overrun than the menu |
+| Spawn placement (iter 4) | Each pop-up spawns **far from the previous one**; same for Title ghosts | Replaces the old bloom-adjacency clustering. Bloom now reads as the whole screen filling rather than clumps growing |
+| Tutorial (iter 4) | **Once per page session** (a refresh shows it again; retries in the same session skip it) | Testers never needed it twice; retrying through it was friction |
+| Pop-up types (iter 4) | **Warning (yellow), error (red danger), downloading (dark terminal)** plus the plain one | Visual variety now; different behavior stays in iteration 5 |
+| Taskbar (iter 4) | Install **percentage** instead of a seconds countdown; closed/open counts move into the pause panel; the start button reads **pause** | |
+| Pause panel (iter 4) | No resume button (the taskbar button resumes); stat rows use an accent of the panel colour | |
 | Title ghosts (iter 3b, revised) | **14 ghosts anywhere on screen**, built by JS, popping faster | No reserved band: the title block paints over the ghosts, so it stays readable. Ghosts are sized like real pop-ups so their content never clips, and placement rejects piling on an already-placed ghost |
 
 ## 4. Screens and flow
