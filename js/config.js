@@ -5,23 +5,24 @@ INAV.config = {
   STAGE_H: 720,
   TASKBAR_H: 56,
 
-  CAP: 24,
+  CAP: 18,
   ROUND_SECONDS: 60,
 
   FIRST_SPAWN_MS: 600,
-  INTERVAL_START_MS: 1000,
-  INTERVAL_END_MS: 300,
-  INTERVAL_CURVE: 0.55,
+  SPAWN_RAMP: [
+    { t: 0, ms: 1150 },
+    { t: 15, ms: 950 },
+    { t: 30, ms: 400 },
+    { t: 60, ms: 260 },
+  ],
+  SPAWN_JITTER_PCT: 0.3,
   MAX_DT_MS: 100,
 
-  BURST_GAP_S: { min: 3, max: 6 },
-  BURST_SIZE: { start: 2, end: 5 },
-  BURST_JITTER: { min: -1, max: 2 },
-  SPAWN_GRID: { cols: 6, rows: 4 },
+  SPAWN_GRID: { cols: 6, rows: 3 },
   SPAWN_JITTER: 6,
 
-  POPUP_W: { min: 215, max: 240 },
-  POPUP_H: { min: 160, max: 178 },
+  POPUP_W: { min: 225, max: 255 },
+  POPUP_H: { min: 190, max: 210 },
   SAFE: { left: 16, top: 16, right: 16, bottom: 16 },
 
   CLOSE_ANIM_MS: 100,

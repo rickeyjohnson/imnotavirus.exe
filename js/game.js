@@ -6,7 +6,6 @@
     score: 0,
     spawnAcc: 0,
     nextSpawnIn: C.FIRST_SPAWN_MS,
-    burstIn: 0,
     lastFrame: 0,
     result: null,
     scores: {
@@ -17,9 +16,23 @@
   let onPhase = function () {};
   let tutorialShown = false;
 
+  // Piecewise ramp: easy first 15s, hard by 0:30, tightening to the end.
   function interval(t) {
-    const p = Math.min(Math.max(t / C.ROUND_SECONDS, 0), 1);
-    return C.INTERVAL_START_MS - (C.INTERVAL_START_MS - C.INTERVAL_END_MS) * Math.pow(p, C.INTERVAL_CURVE);
+    const keys = C.SPAWN_RAMP;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const a = keys[i];
+      const b = keys[i + 1];
+      if (t <= b.t) {
+        const p = Math.max(0, Math.min(1, (t - a.t) / (b.t - a.t)));
+        return a.ms + (b.ms - a.ms) * p;
+      }
+    }
+    return keys[keys.length - 1].ms;
+  }
+
+  function nextGap(t) {
+    const j = C.SPAWN_JITTER_PCT;
+    return interval(t) * (1 - j + Math.random() * j * 2);
   }
 
   function snapshot() {
@@ -45,7 +58,6 @@
     state.score = 0;
     state.spawnAcc = 0;
     state.nextSpawnIn = C.FIRST_SPAWN_MS;
-    state.burstIn = C.BURST_GAP_S.min * 1000;
     state.result = null;
   }
 
@@ -144,13 +156,6 @@
     if (state.phase === "play") state.score++;
   }
 
-  function burstSize(t) {
-    const p = Math.min(Math.max(t / C.ROUND_SECONDS, 0), 1);
-    const mid = C.BURST_SIZE.start + (C.BURST_SIZE.end - C.BURST_SIZE.start) * p;
-    const j = C.BURST_JITTER;
-    return Math.max(1, Math.round(mid + j.min + Math.random() * (j.max - j.min)));
-  }
-
   function step(dt) {
     state.t += dt / 1000;
 
@@ -163,25 +168,11 @@
     while (state.spawnAcc >= state.nextSpawnIn) {
       state.spawnAcc -= state.nextSpawnIn;
       INAV.popups.spawn();
-      state.nextSpawnIn = interval(state.t);
+      state.nextSpawnIn = nextGap(state.t);
       if (INAV.popups.count() >= C.CAP) {
         crash();
         return;
       }
-    }
-
-    state.burstIn -= dt;
-    if (state.burstIn <= 0) {
-      const count = burstSize(state.t);
-      for (let i = 0; i < count; i++) {
-        INAV.popups.spawn();
-        if (INAV.popups.count() >= C.CAP) {
-          crash();
-          return;
-        }
-      }
-      const gap = C.BURST_GAP_S;
-      state.burstIn = (gap.min + Math.random() * (gap.max - gap.min)) * 1000;
     }
   }
 
