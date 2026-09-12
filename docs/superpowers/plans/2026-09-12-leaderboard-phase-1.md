@@ -444,7 +444,7 @@ Create `js/names.js`:
     return String(raw == null ? "" : raw)
       .toLowerCase()
       .replace(/[^a-z0-9!@$]/g, "")
-      .replace(/[01345 7!@$]/g, (ch) => LEET[ch] || ch)
+      .replace(/[013457!@$]/g, (ch) => LEET[ch] || ch)
       .replace(/(.)\1+/g, "$1");
   }
 
@@ -494,7 +494,7 @@ Reload and paste:
 
 Expected, in order: ok; ok; rejected for `!`; rejected as 14 characters; "Type a name first"; "Type a name first"; rejected as 13 characters; rejected for the Kelvin-sign look-alike; "Pick a different name"; "Pick a different name"; **ok** (`classic` contains no blocklist word — confirm it is not a false positive); ok.
 
-The `RicKey` case is the important one: it is a homoglyph attack that looks identical to "Rickey" in most fonts, and the charset rule is what stops it.
+The `RicKey` case is the important one: that is U+212A, the Kelvin sign, which renders identically to a capital K in most fonts, and the charset rule is the only thing that stops it. **Copy the line, don't retype it** — retyping gives you an ASCII K, which passes, and you'll think the check is broken.
 
 - [ ] **Step 4: Commit**
 
@@ -900,7 +900,6 @@ Create `js/board-ui.js`:
 
   function rowHtml(r) {
     const cls = r.mine || r.isLast ? ' class="row-mine"' : "";
-    const won = r.won ? '<span class="won-badge">survived</span>' : "";
     const current = r.isLast ? ' aria-current="true"' : "";
     return (
       "<tr" + cls + current + ">" +
@@ -1331,7 +1330,7 @@ git commit -m "feat: name entry on both end screens with inline validation"
 
 **Interfaces:**
 - Consumes: `INAV.config.LEADERBOARD.WHEEL_MS`, `INAV.game.startTutorial()`, `INAV.game.showBoard()`.
-- Produces: `INAV.wheel.start()`, `INAV.wheel.stop()`, `INAV.wheel.action()` → `"start"|"board"`.
+- Produces: `INAV.wheel.init()`, `INAV.wheel.start()`, `INAV.wheel.stop()`, `INAV.wheel.action()` → `"start"|"board"`.
 
 - [ ] **Step 1: Replace the title buttons**
 
