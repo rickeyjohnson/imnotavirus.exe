@@ -306,6 +306,8 @@ git commit -m "feat: start-menu style pause panel with live round info"
 
 ### Task 3: Ten spread-out ghosts
 
+> **Amended during execution.** Step 4's uniform rejection sampling clumped ghosts into the widest gap, so it was replaced by a four-band round-robin (top, right, bottom, left). The final review then found the hand-tuned reserved rectangle was ~50px narrower than the rendered logo, so the shipped code measures the title block at build time (`reservedRect()`), gives ghosts their own `GHOST_MARGIN` bounds, and warns if a ghost cannot be placed. Read `js/screens.js` for the shipped algorithm.
+
 **Files:** Modify `js/config.js`, `js/popups.js`, `js/screens.js`, `index.html`
 
 **Interfaces:**

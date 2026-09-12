@@ -25,7 +25,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, and they sprea
 | Topic | Decision | Notes |
 |---|---|---|
 | Platform | Browser, plain HTML/CSS/JS | Pop-ups are DOM elements |
-| Win screen | **Keep a Success screen** | Overrides the GDD "Cut" list; kept as a plain results dialog so replay stays the focus |
+| Win screen | **Keep a Success screen** | Overrides the GDD "Cut" list. Was a plain results dialog; superseded by the full-screen green `:)` in iteration 3b |
 | Lose rule | **Pop-up count cap**: crash the instant `open >= CAP` | `CAP = 12` to start; tunable |
 | Close input | **Click anywhere on a pop-up** | Matches the GDD cut of precision clicking; uses `pointerdown` for speed |
 | Tutorial | **One practice pop-up + instruction bar** | Closing it starts the round. Shown on every Start from Title (confirmed in iter 2 Q1) |
@@ -124,7 +124,7 @@ Target feel from the GDD: by 0:30 pop-ups arrive noticeably faster; at 0:55 a sk
 
 ## 6. Art direction (from the GDD)
 
-**Palette:** five values and one accent. These are the only colors allowed.
+**Palette:** six values and one accent (green was added in iteration 3b). These are the only colors allowed.
 | Token | Hex | Use |
 |---|---|---|
 | `--desk` | `#00CAFF` | Desktop background |
@@ -143,7 +143,7 @@ Target feel from the GDD: by 0:30 pop-ups arrive noticeably faster; at 0:55 a sk
 
 **Tokens are the only way to size chrome.** Border weight comes from `--line` or `--line-thin`, corner radius from `--radius` or a `calc()` on it, and the button press distance from `--press`. This includes inline SVG geometry (`stroke-width`, `rx`) and CSS `outline` widths, so changing one token restyles the whole game. The sanctioned exceptions are `999px` for pills, `50%` for circles, and the taskbar flag's own 2 px squares.
 
-**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up and dialog title bars and the taskbar. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, keep blue-background text at 16 px or larger where possible, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
+**Known contrast limits.** The palette is fixed by the GDD, and white-on-`--blue` measures 4.11:1 — fine for large text, below AA for small text. That affects the pop-up title bars, the dialog/panel title bars and the taskbar. Ink on `--win` measures 5.6:1 and is the required pairing for the win screen and any later "safe" state. Prefer ink-on-paper (12.4:1) or ink-on-`--warn` (11:1) for anything small, keep blue-background text at 16 px or larger where possible, and never put small text on `--err` (3.2:1 either direction) — show danger with border weight, fills or the meter instead.
 
 **Rules:** flat vector with hard edges and bold outlines. No gradients, textures, realistic shadows, glass, pixel art, serif fonts or thin fonts. The only "shadow" allowed is a hard flat offset block on buttons. The progress bar may use hard-stop diagonal stripes, matching the hatched bar in the sketches. Lighting is flat and even. Honor `prefers-reduced-motion`.
 
@@ -157,7 +157,7 @@ css/
   base.css              palette tokens, reset, #stage scaling, letterbox
   window.css            the anchor pop-up (.win, .popup, animations)
   desktop.css           desktop icons, taskbar, progress bar, chips
-  screens.css           title, tutorial, success dialog, crash screen, buttons
+  screens.css           title, tutorial, pause panel, crash and win screens, buttons
 js/
   config.js             INAV.config: every tuning knob + pop-up copy text
   storage.js            INAV.storage: safe localStorage get/set
@@ -299,7 +299,7 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 
 **Screen state machine**
 - **What:** exactly one screen is active at a time.
-- **How:** `game` owns `phase` and calls `screens.show(phase, snapshot)` on every change. `show` maps the phase to a `[data-screen]` section (for example, `crashing` shows the play screen), sets `hidden` on all the others, and runs that screen's enter logic, such as filling in scores. Screen sections let clicks through (`pointer-events: none`) except on their buttons and dialogs and on the full-cover pause and crash screens, so pop-ups under a screen stay clickable.
+- **How:** `game` owns `phase` and calls `screens.show(phase, snapshot)` on every change. `show` maps the phase to a `[data-screen]` section (for example, `crashing` shows the play screen), sets `hidden` on all the others, and runs that screen's enter logic, such as filling in scores. Screen sections let clicks through (`pointer-events: none`) except on their buttons and dialogs and on the full-cover pause, crash and win screens, so pop-ups under a screen stay clickable.
 - **Knobs:** none.
 - **Test:** walk every arrow in §4. No two screens should ever show together.
 - **Broken:** the Title shows through behind Gameplay, or pop-ups carry over onto the Title.
@@ -388,7 +388,7 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 - [ ] The crash screen is palette blue with a big `:(`.
 - [ ] Ghost pop-ups come and go on the Title and never block the start button.
 - [ ] The start button reads "resume" while paused.
-- [ ] No color outside the six palette tokens appears anywhere (the pause dim is ink with alpha).
+- [ ] No color outside the seven palette tokens appears anywhere (the pause dim is ink with alpha).
 
 ---
 
@@ -419,7 +419,7 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 
 **Manual test checklist**
 - [ ] The pause panel sits above the start button, its numbers match the taskbar, and all three ways to resume work.
-- [ ] Ten ghosts, newly placed on each visit to the Title, never covering the title text.
+- [ ] Ten ghosts, newly placed on each visit to the Title, never covering the title text. Test it against the rendered elements (`.center > *` rects), not against the reserved rectangle — the placement math makes the latter pass by construction.
 - [ ] Winning shows the green `:)` screen with dark text; losing still shows the blue one.
 - [ ] "New best" still appears only when the record is beaten.
 
@@ -488,6 +488,14 @@ Each mechanic guide uses the same five parts: **What:** what the player experien
 ---
 
 ### Iteration 6: Polish and ship
+
+**Carried over from the iteration 3b review:**
+- Fold the crash and win screens into one shared rule set (they duplicate ~6 rules and their headings disagree on weight), and pick one heading weight.
+- Band allocation is deterministic for ten ghosts (3 top / 3 right / 2 bottom / 2 left). Shuffle the starting band if the ring should vary.
+- Resuming from the pause panel drops focus to `<body>`; return it to the taskbar start button.
+- `.start-menu-item`'s hover fill and focus ring are both `--warn`; consider a paper outline.
+- `tools/dev-server.py` silences its own error logging and carries a shebang without the executable bit.
+
 
 **Goal:** final assets, the §8 edge cases checked by hand, and a shareable build.
 
