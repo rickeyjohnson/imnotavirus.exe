@@ -1,25 +1,35 @@
 (function () {
   const C = INAV.config;
 
-  // Leetspeak folding, so "n00b" and "noob" hit the same blocklist entry.
   const LEET = { "0": "o", "1": "i", "!": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", "$": "s" };
 
-  // Deliberately short and dull. It is a speed bump, not a guarantee, and the
-  // real floor is the server-side copy added in phase 2.
-  const BLOCKED = [
-    "anus", "arse", "ass", "bastard", "bitch", "bollocks", "boner", "clit",
-    "cock", "coon", "cum", "cunt", "dick", "dildo", "dyke", "fag", "faggot",
-    "fuck", "jizz", "kike", "nazi", "nigg", "penis", "piss", "porn", "prick",
-    "pussy", "queer", "rape", "retard", "scrotum", "sex", "shit", "slut",
-    "spic", "tits", "tranny", "twat", "vagina", "wank", "whore",
+  // Unambiguous: no ordinary English word or name contains these, so matching
+  // them anywhere in the name is safe.
+  const BLOCKED_ANYWHERE = [
+    "fuck", "cunt", "bitch", "nigg", "faggot", "whore", "dildo", "bastard",
+    "wank", "jizz", "clit", "scrotum", "penis", "vagina", "molest",
   ];
 
+  // Short or word-forming: whole-word matches only. Substring-matching these
+  // is the Scunthorpe problem — "ass" is inside "classic", "arse" inside
+  // "sparse", "cum" inside "cumulus", "sex" inside "Essex".
+  const BLOCKED_WORDS = [
+    "anus", "arse", "ass", "bollocks", "boner", "cock", "coon", "cum", "dick",
+    "dyke", "fag", "kike", "nazi", "piss", "porn", "prick", "pussy", "queer",
+    "rape", "retard", "sex", "shit", "slut", "spic", "tits", "tranny", "twat",
+  ];
+
+  // Folds leetspeak, drops anything that isn't a letter or a space, and
+  // collapses runs of THREE or more so "fuuuuck" becomes "fuck" while "ass"
+  // survives with both letters intact.
   function normalise(raw) {
     return String(raw == null ? "" : raw)
       .toLowerCase()
-      .replace(/[^a-z0-9!@$]/g, "")
-      .replace(/[013457!@$]/g, (ch) => LEET[ch] || ch)
-      .replace(/(.)\1+/g, "$1");
+      .replace(/[01345 7!@$]/g, (ch) => LEET[ch] || ch)
+      .replace(/[^a-z ]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/(.)\1{2,}/g, "$1");
   }
 
   function check(raw) {
@@ -34,9 +44,11 @@
     if (bad) return { ok: false, error: "“" + bad[0] + "” isn't allowed — letters, numbers and spaces only." };
 
     const folded = normalise(name);
-    if (BLOCKED.some((word) => folded.includes(word))) {
-      return { ok: false, error: "Pick a different name." };
-    }
+    const compact = folded.replace(/ /g, "");
+    const words = folded.split(" ").filter(Boolean);
+
+    if (BLOCKED_ANYWHERE.some((w) => compact.includes(w))) return { ok: false, error: "Pick a different name." };
+    if (BLOCKED_WORDS.some((w) => words.includes(w))) return { ok: false, error: "Pick a different name." };
 
     return { ok: true, name: name };
   }
