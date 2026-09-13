@@ -3,71 +3,28 @@
 
   const LEET = { "0": "o", "1": "i", "!": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", "$": "s" };
 
-  // Matched anywhere in the fully compacted name (spaces stripped). These are
-  // slurs/profanity with no ordinary-word collisions worth worrying about.
+  // Long and unambiguous — these cannot occur inside a real name or ordinary
+  // word, so matching them anywhere in the name is safe.
   const BLOCKED_ANYWHERE = [
-    "fuck", "bitch", "faggot", "whore", "dildo", "bastard",
-    "wank", "jizz", "clit", "scrotum", "penis", "vagina", "molest",
+    "fuck", "bitch", "faggot", "whore", "dildo", "bastard", "wank", "jizz",
+    "clit", "scrotum", "molest", "nigger", "nigga", "niggaz",
   ];
 
-  // Short or word-forming: these would wrongly catch ordinary words as
-  // substrings ("ass" inside "classic", "arse" inside "sparse", "cum" inside
-  // "cumulus", "sex" inside "Essex"), so they're substring-matched only after
-  // ALLOW has stripped the tokens that would trigger those false positives.
+  // Short, or found inside real names and ordinary words. Matched ONLY as a
+  // whole token, the whole name, or a run of tokens joined together — never as
+  // a substring. "Assange", "Nasser", "Fagan", "Cockcroft", "Prickett" and
+  // "sparse" are real names and words; refusing one of those is a false
+  // accusation against a real person, which is worse than letting an
+  // obfuscated spelling like "cassholes" through. Compounds are listed
+  // explicitly because substring matching is what we gave up to get here.
   const BLOCKED_WORDS = [
-    "anus", "arse", "ass", "bollocks", "boner", "cock", "coon", "cum", "cunt",
-    "dick", "dyke", "fag", "kike", "nazi", "nigg", "piss", "porn", "prick",
-    "pussy", "queer", "rape", "retard", "sex", "shit", "slut", "spic", "tits",
-    "tranny", "twat",
-  ];
-
-  // Innocent stems. A BLOCKED_WORDS hit is excused only when one of these
-  // occurs in the compacted name at a span that fully covers that exact hit
-  // ("classic" excuses "ass" because "class" covers it; "cassholes" does
-  // NOT excuse "asshole", because "cass" only covers part of it). Grouped by
-  // which BLOCKED_WORDS entry they'd otherwise trip.
-  const ALLOW = [
-    // anus
-    "uranus", "manuscript",
-    // arse
-    "spars", "coars", "hoars", "pars", "arsen", "marseill",
-    // ass
-    "bass", "class", "glass", "grass", "brass", "mass", "pass", "compass",
-    "bypass", "surpass", "trespass", "harass", "embarrass", "molasses",
-    "assassin", "assess", "assist", "associate", "assign", "asset",
-    "assemble", "assume", "assault", "assortment", "cass", "sassy",
-    "lassie", "nassau", "massachusetts",
-    // cock
-    "cockpit", "cocktail", "cockroach", "cockerel", "cockney", "cockatoo",
-    "peacock", "shuttlecock", "woodcock", "hancock", "babcock", "hitchcock",
-    "alcock", "adcock", "cockburn",
-    // coon
-    "raccoon", "racoon", "cocoon", "tycoon",
-    // cum
-    "cumul", "accumul", "cumbersome", "cumming", "circumstance",
-    "circumference", "circumvent", "encumber", "incumbent", "recumbent",
-    "cucumber", "document",
-    // cunt
-    "scunthorpe",
-    // dick
-    "dickens", "dickinson", "dickson", "dickerson", "dickie", "dicky",
-    // nigg
-    "niggle", "niggardly",
-    // piss
-    "pissarro",
-    // prick
-    "prickl",
-    // pussy
-    "pussycat", "pussywillow",
-    // rape
-    "grape", "drape",
-    // retard
-    "retardant",
-    // sex
-    "essex", "sussex", "middlesex", "sextant", "sextet", "sexton",
-    "sextuplet", "asexual",
-    // spic
-    "spice", "spicy", "despicable", "hospice", "conspicuous", "auspic",
+    "anus", "arse", "arsehole", "ass", "asses", "asshole", "assholes",
+    "badass", "bollocks", "boner", "bullshit", "cock", "cocks", "cocksucker",
+    "coon", "coons", "cum", "cunt", "cunts", "dick", "dickhead", "dicks",
+    "dumbass", "dyke", "fag", "fags", "jackass", "kike", "masshole", "nazi",
+    "penis", "piss", "porn", "prick", "pussy", "queer", "rape", "rapist",
+    "retard", "sex", "shit", "shithead", "shitty", "slut", "smartass", "spic",
+    "tits", "tranny", "twat", "vagina", "wanker",
   ];
 
   // Folds leetspeak, drops anything that isn't a letter or a space, and
@@ -96,34 +53,25 @@
 
     const folded = normalise(name);
     const compact = folded.replace(/ /g, "");
+    const words = folded.split(" ").filter(Boolean);
 
-    if (BLOCKED_ANYWHERE.some((w) => compact.includes(w))) return { ok: false, error: "Pick a different name." };
-
-    // Exempt individual MATCHES, not whole tokens. Dropping a token that began
-    // with an innocent stem let anything appended to it ride in free —
-    // "cassholes" passed because the "cass" stem swallowed the entire token.
-    // A hit is excused only when an innocent stem covers that exact span.
-    function covered(start, end) {
-      return ALLOW.some((stem) => {
-        let at = compact.indexOf(stem);
-        while (at !== -1) {
-          if (at <= start && at + stem.length >= end) return true;
-          at = compact.indexOf(stem, at + 1);
-        }
-        return false;
-      });
+    // A blocked word can be spelled across token boundaries ("a ss hole"), so
+    // test every contiguous run of tokens joined together. These are equality
+    // matches, never substring ones: the span "bassplayer" must not match
+    // "ass", which is the whole reason this list is separate.
+    const spans = [];
+    for (let i = 0; i < words.length; i++) {
+      let span = "";
+      for (let j = i; j < words.length; j++) {
+        span += words[j];
+        spans.push(span);
+      }
     }
 
-    const hit = BLOCKED_WORDS.some((word) => {
-      let at = compact.indexOf(word);
-      while (at !== -1) {
-        if (!covered(at, at + word.length)) return true;
-        at = compact.indexOf(word, at + 1);
-      }
-      return false;
-    });
+    const isWord = (w) => spans.indexOf(w) !== -1;
 
-    if (hit) return { ok: false, error: "Pick a different name." };
+    if (BLOCKED_ANYWHERE.some((w) => compact.includes(w))) return { ok: false, error: "Pick a different name." };
+    if (BLOCKED_WORDS.some(isWord)) return { ok: false, error: "Pick a different name." };
 
     return { ok: true, name: name };
   }
