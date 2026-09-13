@@ -104,6 +104,16 @@
     x = Math.round(clamp(x, area.minX, area.maxX));
     y = Math.round(clamp(y, area.minY, area.maxY));
 
+    // Keep clear of the sound toggle in the top-right corner. offsetLeft/Top
+    // are layout values in stage pixels, unaffected by the stage's CSS scale,
+    // and both #popups and the toggle measure from the stage's top-left.
+    const guard = document.getElementById("sound-toggle");
+    if (guard && guard.offsetWidth) {
+      const left = guard.offsetLeft - C.SOUND_TOGGLE_CLEARANCE;
+      const bottom = guard.offsetTop + guard.offsetHeight + C.SOUND_TOGGLE_CLEARANCE;
+      if (x + w > left && y < bottom) y = Math.min(bottom, area.maxY);
+    }
+
     const type = pickType(opts.type);
     const el = create(x, y, w, h, type, opts.title || pick(type.titles), opts.message || pick(type.messages));
     if (INAV.audio) INAV.audio.play("popup");

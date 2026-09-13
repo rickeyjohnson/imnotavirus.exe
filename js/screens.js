@@ -149,6 +149,7 @@
     $("start-btn").focus();
     INAV.wheel.start();
     startGhosts();
+    if (INAV.audio) INAV.audio.startLoop("startup", C.AUDIO.STARTUP_REPEAT_MS);
   }
 
   function enterPaused(s) {

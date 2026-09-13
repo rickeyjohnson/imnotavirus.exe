@@ -44,6 +44,7 @@ INAV.config = {
   POPUP_W: { min: 225, max: 255 },
   POPUP_H: { min: 190, max: 210 },
   SAFE: { left: 16, top: 16, right: 16, bottom: 16 },
+  SOUND_TOGGLE_CLEARANCE: 10,
 
   CLOSE_ANIM_MS: 100,
   END_LOCKOUT_MS: 500,
@@ -71,6 +72,7 @@ INAV.config = {
     clientId: "inav.clientId",
     playerName: "inav.playerName",
     fakeRows: "inav.fakeRows",
+    muted: "inav.muted",
   },
 
   // Volumes are RMS-matched from the actual decoded files, not picked by ear.
@@ -80,12 +82,22 @@ INAV.config = {
   // two "moment" sounds -- the title music and the crash tone -- are nudged up
   // on purpose, since nothing competes with them.
   //
-  // `offset` skips measured leading silence. popup_clicked has 113 ms of it and
-  // failed_error_screen has 603 ms, which would otherwise read as input lag.
+  // `offset` skips measured leading silence. popup_clicked has 113 ms of it,
+  // which would otherwise read as input lag on every close.
   AUDIO: {
     ENABLED: true,
     MASTER: 1,
     SOUNDS: {
+      // Title screen. Browsers refuse sound until the player has interacted
+      // with the page, so on a cold load this is held and played on the first
+      // click or key press instead -- as long as the title screen is still up.
+      startup: {
+        src: "audio/windows_startup.mp3",
+        volume: 0.7,
+        offset: 0.1,
+        voices: 1,
+        holdUntilUnlocked: true,
+      },
       // A pop-up arriving. Also used for the title screen's background ghosts.
       popup: { src: "audio/popup_appears.wav", volume: 1, offset: 0, voices: 6, minGapMs: 60 },
       // The player closing a pop-up.
@@ -93,8 +105,9 @@ INAV.config = {
       // Any UI button.
       button: { src: "audio/button_click.mp3", volume: 1, offset: 0.05, voices: 2 },
       // The crash screen.
-      crash: { src: "audio/failed_error_screen.mp3", volume: 0.3, offset: 0.55, voices: 1 },
+      crash: { src: "audio/failed_error_screen.wav", volume: 0.3, offset: 0.04, voices: 1 },
     },
+    STARTUP_REPEAT_MS: 30000,
     CRASH_REPEAT_MS: 60000,
   },
 

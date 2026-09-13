@@ -7,8 +7,15 @@
   // file from a file:// page -- which is how this game is meant to open. An
   // <audio> element loads there fine, so that is what this uses.
   const pools = {};
-
   const loops = {};
+
+  let muted = false;
+
+  // A sound the browser refused to start because the player hadn't
+  // interacted with the page yet. Autoplay policy blocks audio until a real
+  // gesture, so the title music is held here and started by the first click
+  // or key press -- but only if its loop is still running by then.
+  let pending = null;
 
   function build(name) {
     const cfg = A.SOUNDS[name];
@@ -33,30 +40,54 @@
     return el;
   }
 
-  function start(el, cfg) {
+  function silence(pool) {
+    pool.voices.forEach((el) => {
+      if (!el.paused) el.pause();
+      try {
+        el.currentTime = pool.cfg.offset || 0;
+      } catch (e) {}
+    });
+  }
+
+  function start(name, pool) {
+    const el = freeVoice(pool);
     try {
-      el.currentTime = cfg.offset || 0;
+      el.currentTime = pool.cfg.offset || 0;
     } catch (e) {}
     const p = el.play();
     if (p && p.catch) {
-      p.catch(() => {
-        // Blocked by autoplay policy, or interrupted by a newer play() on the
-        // same element. Neither is worth surfacing to the player.
+      p.catch((err) => {
+        // NotAllowedError is the autoplay block. Anything else -- a newer
+        // play() interrupting this one, a voice being paused on screen exit --
+        // is routine and not worth surfacing.
+        if (err && err.name === "NotAllowedError" && pool.cfg.holdUntilUnlocked) pending = name;
       });
     }
-    return p;
+  }
+
+  // Runs after the game's own click and key handlers (bubble phase on the
+  // window), so if that click just left the title screen the loop is already
+  // stopped and the held music is dropped rather than blurted out.
+  function retryPending() {
+    if (!pending || muted) return;
+    const name = pending;
+    pending = null;
+    if (loops[name] && pools[name]) start(name, pools[name]);
   }
 
   INAV.audio = {
     init() {
       if (!A.ENABLED) return;
+      muted = INAV.storage.get(C.STORAGE_KEYS.muted, false) === true;
       Object.keys(A.SOUNDS).forEach((name) => {
         pools[name] = build(name);
       });
+      window.addEventListener("click", retryPending);
+      window.addEventListener("keydown", retryPending);
     },
 
     play(name) {
-      if (!A.ENABLED) return;
+      if (!A.ENABLED || muted) return;
       const pool = pools[name];
       if (!pool) return;
 
@@ -66,16 +97,17 @@
       if (pool.cfg.minGapMs && now - pool.lastAt < pool.cfg.minGapMs) return;
       pool.lastAt = now;
 
-      start(freeVoice(pool), pool.cfg);
+      start(name, pool);
     },
 
-    // Plays now and again every `everyMs` until stopped. Used for the crash
-    // screen's error tone.
+    // Plays now and again every `everyMs` until stopped. The loop keeps
+    // ticking while muted, so unmuting picks the rhythm back up rather than
+    // restarting it.
     startLoop(name, everyMs) {
       if (!A.ENABLED) return;
       this.stopLoop(name);
-      this.play(name);
       loops[name] = setInterval(() => INAV.audio.play(name), everyMs);
+      this.play(name);
     },
 
     stopLoop(name) {
@@ -83,20 +115,25 @@
         clearInterval(loops[name]);
         delete loops[name];
       }
-      const pool = pools[name];
-      if (!pool) return;
-      pool.voices.forEach((el) => {
-        if (!el.paused) {
-          el.pause();
-          try {
-            el.currentTime = pool.cfg.offset || 0;
-          } catch (e) {}
-        }
-      });
+      if (pending === name) pending = null;
+      if (pools[name]) silence(pools[name]);
     },
 
     stopAll() {
       Object.keys(loops).forEach((name) => INAV.audio.stopLoop(name));
+    },
+
+    isMuted() {
+      return muted;
+    },
+
+    setMuted(on) {
+      muted = !!on;
+      INAV.storage.set(C.STORAGE_KEYS.muted, muted);
+      if (muted) {
+        pending = null;
+        Object.keys(pools).forEach((name) => silence(pools[name]));
+      }
     },
   };
 })();

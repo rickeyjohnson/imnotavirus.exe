@@ -10,6 +10,22 @@
   INAV.wheel.init();
   INAV.audio.init();
 
+  const soundToggle = $("sound-toggle");
+  const paintSoundToggle = () => {
+    const off = INAV.audio.isMuted();
+    soundToggle.setAttribute("aria-pressed", String(off));
+    soundToggle.setAttribute("aria-label", off ? "Unmute sound" : "Mute sound");
+    soundToggle.title = off ? "Sound off" : "Sound on";
+  };
+  paintSoundToggle();
+  soundToggle.addEventListener("click", () => {
+    INAV.audio.setMuted(!INAV.audio.isMuted());
+    paintSoundToggle();
+    // Unmuting gives no feedback otherwise: the click sound fired on
+    // pointerdown, while the game was still muted.
+    if (!INAV.audio.isMuted()) INAV.audio.play("button");
+  });
+
   // Every button in the game shares one click sound.
   document.addEventListener(
     "pointerdown",

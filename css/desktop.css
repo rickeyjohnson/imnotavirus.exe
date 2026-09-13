@@ -130,3 +130,46 @@
   border-left: var(--line-thin) solid var(--ink);
   font-size: 14px;
 }
+
+/* Sound toggle, top right. Sits above pop-ups (1), screens (2), the taskbar
+   (3) and the crash screen (5) so it can be reached from every phase, and
+   below the debug overlay (10). js/popups.js keeps pop-ups from spawning
+   underneath it -- otherwise a top-right pop-up's close button lands exactly
+   here, and the player mutes the game instead of closing it. */
+.sound-toggle {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 8;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--paper);
+  border: var(--line) solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 0 calc(var(--press) / 2) 0 var(--ink);
+  cursor: pointer;
+  transition: transform 60ms linear, box-shadow 60ms linear, background 100ms linear;
+}
+.sound-toggle:hover {
+  background: var(--warn);
+}
+.sound-toggle:active {
+  transform: translateY(calc(var(--press) / 2));
+  box-shadow: 0 0 0 var(--ink);
+}
+.sound-toggle:focus-visible {
+  outline: var(--line) solid var(--ink);
+  outline-offset: var(--line);
+}
+.sound-toggle .sound-slash {
+  display: none;
+}
+.sound-toggle[aria-pressed="true"] .sound-slash {
+  display: inline;
+}
+.sound-toggle[aria-pressed="true"] .sound-waves {
+  display: none;
+}
