@@ -41,24 +41,41 @@ Everything in the game talks to one module and never to a network directly:
 
 ```
 INAV.leaderboard
-  top(limit)                -> Promise<{ rows, total, cut }>
-  submit({ name, score, won }) -> Promise<{ id, rank }>
+  top(limit)                -> Promise<{ rows, total }>
+  submit({ name, score, won }) -> Promise<{ id, rank }>   // rank is null if it couldn't be determined
   state()                   -> "ready" | "loading" | "offline" | "error"
-  me()                      -> { clientId, name, lastId, lastRank }   // name/lastId/lastRank may be null
+  me()                      -> { clientId, name, lastId, lastRank }   // name/lastId/lastRank/rank may be null
 ```
 
 A row is `{ id, rank, name, score, won, mine, isLast }`. `mine` marks every row
 that belongs to this browser's `clientId`; `isLast` marks only the one row just
 submitted, which is what actually drives the highlight and the pin — a returning
 player with several old rows on the board should not see all of them lit up.
-`cut` is the rank the visible list stops at, so the UI knows when to pin the
-player's own row below a separator instead of scrolling to find it. `me()`
-additionally returns `lastId`/`lastRank`, the id and rank from the most recent
-`submit()` this session, which is what the pin text reads.
+`me()` additionally returns `lastId`/`lastRank`, the id and rank from the most
+recent `submit()` this session, which is what the pin text reads; `lastRank` is
+a snapshot taken at submit time (or `null`, if the rank couldn't be determined
+that time), never re-queried, so the pin copy is worded as a point-in-time fact
+rather than a live standing.
 
 Underneath `INAV.leaderboard` sits the actual swappable seam, `INAV.leaderboardSource`,
 with four methods: `fetchTop(limit)`, `insert(entry)`, `rankOf({ score, at })` and
 `state()`. `INAV.leaderboard` is the only thing that calls it; the UI never does.
+`fetchTop` must return rows ordered `score DESC, at ASC`, and `rankOf` must
+break ties with that identical rule (earlier submission wins on equal score).
+`INAV.leaderboard` does not trust this ordering either way: it re-sorts
+whatever `fetchTop` returns by the same rule before assigning positional ranks,
+so a source that returns a different order (e.g. paginated by id) cannot
+desync the rank shown on the board from the rank a player was told at submit
+time. The sort is a backstop for when this isn't followed; the ordering
+requirement above is so it's followed in the first place.
+
+`INAV.leaderboard` also owns classifying a source failure as `"offline"` or
+`"error"` — a rejection is `"offline"` when the source reports itself offline,
+or `navigator.onLine` is `false`, or the rejection is a `TypeError` (what
+`fetch` throws when it cannot reach the network); everything else is
+`"error"`. Both `top()` and `submit()` re-reject with a plain `Error` carrying
+that classification as `.code`; the UI branches on `.code`, never on
+`.message`, and never renders a raw exception's text to the player.
 
 Phase one ships `js/leaderboard-local.js`: about 30 seeded rows whose scores
 follow real play (a crowd between 40 and 110, a few winners above 130), stored
@@ -81,10 +98,12 @@ plain buttons instead.
 
 **Board (`board` phase).** A window titled `leaderboard.exe` over the desktop.
 Columns rank / name / score, marked up as a real `<table>` with header cells.
-Top three carry medal fills. The player's row is highlighted and marked
-`aria-current="true"`; a player below `cut` gets their row pinned under a
-separator. Closing returns to wherever the board was opened from — the title
-screen or an end screen.
+Top three carry medal fills. The row just submitted (`isLast`) gets the strong
+highlight and `aria-current="true"`; any other row of this browser's own past
+runs (`mine`) gets a quieter tint — the two are visually distinguishable, not
+just semantically different. A player whose last run isn't among the visible
+rows gets it pinned under a separator instead. Closing returns to wherever the
+board was opened from — the title screen or an end screen.
 
 **Name entry (crash and success).** Name field plus submit, below the result
 stats. Validation is inline and specific: says which character is not allowed,

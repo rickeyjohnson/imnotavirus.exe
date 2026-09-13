@@ -9,13 +9,17 @@
   }
 
   function rowHtml(r) {
-    const cls = r.mine || r.isLast ? ' class="row-mine"' : "";
+    // isLast (the run just submitted) and mine (any of this browser's rows)
+    // are different claims and must not render identically -- isLast wins
+    // when both are true, since it is the more specific, stronger claim.
+    const rowClass = r.isLast ? "row-current" : r.mine ? "row-mine" : "";
+    const cls = rowClass ? ' class="' + rowClass + '"' : "";
     const current = r.isLast ? ' aria-current="true"' : "";
     return (
       "<tr" + cls + current + ">" +
       "<td>" + medal(r.rank) + "</td>" +
       "<td></td>" +
-      '<td class="col-score">' + r.score + "</td>" +
+      '<td class="col-score"></td>' +
       "</tr>"
     );
   }
@@ -42,8 +46,12 @@
     body.innerHTML = data.rows.map(rowHtml).join("");
 
     // Names are inserted as text, never as HTML. They come from other players.
+    // Score is likewise routed through textContent rather than the innerHTML
+    // template above -- it is server data too, and phase 2 points this seam
+    // at the internet.
     data.rows.forEach((r, i) => {
-      const cell = body.rows[i].cells[1];
+      const row = body.rows[i];
+      const cell = row.cells[1];
       cell.textContent = r.name;
       if (r.won) {
         const badge = document.createElement("span");
@@ -51,15 +59,21 @@
         badge.textContent = "survived";
         cell.appendChild(badge);
       }
+      row.cells[2].textContent = r.score;
     });
 
     // If the run just submitted placed below the visible cut, pin it rather
-    // than making the player hunt for it.
+    // than making the player hunt for it. lastRank is a snapshot taken at
+    // submit time, not a live lookup, so the copy says so instead of
+    // implying it is current -- and never prints a literal "?" when the
+    // rank is unknown (rankOf failed after a successful insert).
     const shown = data.rows.some((r) => r.isLast);
     const pin = $("board-mine");
     if (me.lastId && !shown) {
       pin.hidden = false;
-      pin.textContent = "Your last run: #" + (me.lastRank || "?") + " of " + data.total;
+      pin.textContent = me.lastRank
+        ? "Your last run was #" + me.lastRank + " of " + data.total + " when submitted."
+        : "Your last run is on the board.";
     } else {
       pin.hidden = true;
     }
@@ -77,7 +91,7 @@
         })
         .catch((err) => {
           if (mine !== token) return;
-          if (err && err.message === "offline") {
+          if (err && err.code === "offline") {
             status("The global board needs the online version of the game. Your scores are still saved on this computer.");
           } else {
             status('Could not load the board. <button class="btn small" id="board-retry" type="button">retry</button>');
@@ -85,6 +99,12 @@
             if (retry) retry.addEventListener("click", () => INAV.boardUI.load());
           }
         });
+    },
+
+    // Bumps the token so a response still in flight when the board is closed
+    // renders into hidden DOM instead of the (possibly reused) live view.
+    close() {
+      token++;
     },
   };
 })();

@@ -88,8 +88,18 @@
 .medal-2 { background: var(--silver); }
 .medal-3 { background: var(--bronze); }
 
-.row-mine { background: rgba(0, 120, 253, 0.12); }
+/* Two distinct claims, two distinct treatments: .row-mine marks any of this
+   browser's past rows (a quiet tint, so a returning player isn't confronted
+   with a wall of old runs); .row-current marks only the run just submitted
+   (the strong one) and also carries aria-current="true". Neither relies on
+   colour alone -- both keep bold text, and .row-current adds a left border
+   so it reads even without colour vision. */
+.row-mine { background: rgba(0, 120, 253, 0.1); }
 .row-mine td { font-weight: 700; }
+
+.row-current { background: rgba(0, 120, 253, 0.22); }
+.row-current td { font-weight: 700; }
+.row-current td:first-child { border-left: 4px solid var(--blue); }
 .won-badge {
   margin-left: 6px;
   padding: 0 6px;

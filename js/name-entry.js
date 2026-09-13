@@ -42,7 +42,10 @@
     form.querySelector(".name-note").hidden = true;
     const el = $("name-placed");
     el.hidden = false;
-    el.textContent = "You're #" + rank + " on the board.";
+    // rank is null when insert() succeeded but the follow-up rankOf() call
+    // failed -- the run is on the board either way, just without a known
+    // position, so say that instead of printing a broken number.
+    el.textContent = rank == null ? "You're on the board." : "You're #" + rank + " on the board.";
     const link = document.createElement("button");
     link.type = "button";
     link.className = "btn small";
@@ -93,8 +96,18 @@
       .catch((err) => {
         if (mounted !== result) return;
         setBusy(false);
-        const offline = err && err.message === "offline";
-        showError(offline ? "No connection to the board. Your score is still saved here." : err.message || "That didn't send.");
+        // err.code only exists on a rejection that crossed the source seam
+        // (classified by the facade); a plain Error without it is one of our
+        // own pre-authored validation messages, safe to show as-is. Either
+        // way, a raw exception's own text (e.g. "Failed to fetch") is never
+        // what reaches the player -- the offline/error branches are fixed copy.
+        if (err && err.code === "offline") {
+          showError("No connection to the board. Your score is still saved here.");
+        } else if (err && err.code === "error") {
+          showError("That didn't send. Try again.");
+        } else {
+          showError((err && err.message) || "That didn't send.");
+        }
         $("name-input").focus();
       });
   }
