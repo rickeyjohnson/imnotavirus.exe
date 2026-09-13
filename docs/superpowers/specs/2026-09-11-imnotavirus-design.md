@@ -152,7 +152,7 @@ css/
 js/
   config.js             INAV.config: every tuning knob + pop-up copy text
   storage.js            INAV.storage: safe localStorage get/set
-  audio.js              INAV.audio: pooled <audio> voices per sound, RMS-matched volumes, leading-silence offsets, per-sound rate limits, the title screen's windows_startup loop (every 30 s) and the crash screen's error tone (every 60 s), and a persisted mute. Autoplay-blocked title music is held and played on the first click or key press, but only if the title screen is still up after that click's own handlers ran -- so clicking start first never blurts it over the tutorial. Not Web Audio: that needs fetch(), which cannot read a local file from a file:// page
+  audio.js              INAV.audio: pooled <audio> voices per sound, RMS-matched volumes, leading-silence offsets, per-sound rate limits, the title screen's windows_startup loop (every 30 s), the same chime once per win as the setup wizard appears, and the crash screen's error tone (every 60 s), and a persisted mute. Autoplay-blocked title music is held and played on the first click or key press, but only if the title screen is still up after that click's own handlers ran -- so clicking start first never blurts it over the tutorial. Not Web Audio: that needs fetch(), which cannot read a local file from a file:// page
   stage.js              INAV.stage: fit-to-window scaling, safe-area math
   popups.js             INAV.popups: build/spawn typed windows on the spawn grid, close, clear, count, ghost
   hud.js                INAV.hud: renders the taskbar (antivirus label, progress, install %, start button, clock)

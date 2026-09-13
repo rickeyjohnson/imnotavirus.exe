@@ -16,6 +16,7 @@
   let lockTimer = null;
   let tickTimers = [];
   let ghostTimer = null;
+  let chimedFor = null; // the win that has already had its success chime
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   function ghostsRoot() {
@@ -186,6 +187,14 @@
     $("success-best").textContent = r.best;
     $("success-new-best").hidden = !r.isBest;
     INAV.nameEntry.mount($("success-name-slot"), r);
+    // The antivirus finished installing: it gets the Windows startup chime as
+    // the setup wizard appears. Once per win -- returning from the leaderboard
+    // re-enters this screen for the same result object and stays quiet. Runs
+    // before the reduced-motion early return below so every player hears it.
+    if (INAV.audio && chimedFor !== r) {
+      chimedFor = r;
+      INAV.audio.play("startup");
+    }
 
     const wizard = document.querySelector('[data-screen="success"] .wizard');
     if (!wizard || reducedMotion.matches) {

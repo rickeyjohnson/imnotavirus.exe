@@ -88,9 +88,10 @@ INAV.config = {
     ENABLED: true,
     MASTER: 1,
     SOUNDS: {
-      // Title screen. Browsers refuse sound until the player has interacted
-      // with the page, so on a cold load this is held and played on the first
-      // click or key press instead -- as long as the title screen is still up.
+      // Title screen loop, and played once on the success screen. Browsers
+      // refuse sound until the player has interacted with the page, so on a
+      // cold load the title loop is held and played on the first click or key
+      // press instead -- as long as the title screen is still up.
       startup: {
         src: "audio/windows_startup.mp3",
         volume: 0.7,
