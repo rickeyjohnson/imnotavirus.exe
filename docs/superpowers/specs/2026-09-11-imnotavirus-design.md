@@ -49,7 +49,7 @@ You are a Windows XP-era computer desktop. Pop-ups keep spawning, filling the sc
 | Green (iter 3b, retuned iter 4) | **`#04B550` added as a sixth value**, a deliberate GDD amendment | Now used only for the wizard's tick badges. Three attempts at green-with-white text all failed contrast, which is why the win screen became a wizard instead |
 | Pause panel (iter 3b) | **Start-menu parody** rising from the taskbar start button, with live round info | Replaces the centered pause dialog |
 | Playtest (iter 4) | Two testers: goal understood instantly, no confusion, both survived; **"too easy for the whole first half"**, best moment was the late rush, and both wanted **more pop-up types** | Drives every iteration 4 decision below |
-| Difficulty (iter 4, retuned three times after playtest) | A keyframed ramp: **1 pop-up a second flat until 0:10**, **3 a second at 0:30**, **3.7 a second at 1:00**. One pop-up at a time, with the gap **jittered ±30%** |
+| Difficulty (randomised 2026-09-13) | Each keyframe is a **range, rolled fresh at the start of every round**: about **1 pop-up a second until 0:10**, **2.7-3.0 a second at 0:30**, **3.7-5.0 a second at 1:00**. The roll is clamped monotonic so a round can never ease off partway through. One pop-up at a time, gap **jittered ±30%** | A fixed ramp made every round the same puzzle and put a cliff between 2.5 and 3.0 clicks a second — below it you always lost, above it you always won. The roll turns that cliff into a gradient, so the same player wins some rounds and loses others. Rickey's words: lucky to win, but also skill at times |
 | Win transition | The desk **sweeps itself clear** one pop-up at a time (50 ms apart), holds a beat, then the wizard rises and **ticks its three steps** 220 ms apart before the meter fills | The instant swap gave the win no payoff, and the sweep's length scales with how cluttered the desk was, so a narrow win reads as a narrow win | Rickey found the burst version too hard, and disliked several pop-ups appearing at the same instant. The jitter keeps rounds from being identical, which is what stops every win scoring the same |
 | Cap (iter 4, retuned) | **18 open pop-ups** on a 6×3 grid, sized so the cap covers **88-89%** of the desktop (measured) | The original cap of 12 covered only ~63%, so losing looked less overrun than the menu |
 | Spawn placement (iter 4) | Pop-ups take the **least-occupied cell of a 6×4 grid** with a few pixels of jitter; Title ghosts use furthest-from-the-last placement | Replaces bloom-adjacency clustering. Grid placement is what makes a capped screen read as 90% full; bloom now means the screen filling, not clumps growing |
@@ -80,7 +80,7 @@ Title ──start──▶ Tutorial ──close practice pop-up──▶ Gamepla
 | **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, a "New best" badge when earned, **try again** (goes to Title) |
 | **Success** | The desktop, cleared of pop-ups, with a finished setup wizard: "Installation complete", three ticked steps, a full striped bar, Closed/Best, a "New best" badge when earned, and **finish** (goes to Title). The taskbar stays visible reading 100% |
 
-Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `winning` (the desk sweeps itself clear, 0.2–1.0 s depending on how many pop-ups survived), `success`. Both `crashing` and `winning` leave the desktop on screen and make the taskbar `inert`, so neither ending can be paused.
+Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `winning` (the desk sweeps itself clear, 0.2–1.0 s depending on how many pop-ups survived), `success`, `board` (the leaderboard window, reachable from Title, Game Over and Success; `game` remembers which of those three it was opened from and returns there). `crashing`, `winning` and `board` all make the taskbar `inert`, so none of the three can be paused from the taskbar.
 
 ## 5. Gameplay rules
 
@@ -108,7 +108,7 @@ Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `pa
 `inav.last` holds the most recent finished round's score, `inav.best` the highest ever. `game` is the only module that touches storage; values are held in memory too, so a browser that refuses storage still plays correctly.
 
 ### 5.6 Tuning
-Every knob lives in `js/config.js` — round length, cap, the interval curve, burst gaps and sizes, pop-up sizes, the spawn grid, ghost behaviour and every delay. Read that file for current values rather than duplicating them here. Balance target, measured with a simulated player: ~2.2 clicks/second dies around 0:46, ~2.5 dies around 0:52, ~3.0 survives. A full round emits about 144 pop-ups, so surviving means averaging ~2.4 closes a second for the whole minute — close to the ceiling for aimed clicking at this target size, which is deliberate. An unattended round crashes at about 0:17.
+Every knob lives in `js/config.js` — round length, cap, the interval curve, burst gaps and sizes, pop-up sizes, the spawn grid, ghost behaviour and every delay. Read that file for current values rather than duplicating them here. Balance, measured over 1500 simulated rounds per click speed, each round rolling its own ramp: **2.5 clicks/second never survives, 2.8 wins about a quarter of the time, 3.0 is a coin flip at 61%, 3.2 wins 92%, 3.5 always wins.** That band is roughly the ceiling for aimed clicking at this target size, which is deliberate. A round emits 132-167 pop-ups depending on the roll. An unattended round crashes at about 0:17.
 
 
 ## 6. Art direction (from the GDD)
@@ -147,6 +147,7 @@ css/
   window.css            the anchor pop-up (.win, .popup, animations)
   desktop.css           desktop icons, taskbar, start button, progress meter, clock
   screens.css           title, tutorial, pause panel, crash and win screens, buttons
+  leaderboard.css       the board window, medal podium, pinned-row and loading/empty/offline/error states
 js/
   config.js             INAV.config: every tuning knob + pop-up copy text
   storage.js            INAV.storage: safe localStorage get/set
@@ -157,6 +158,12 @@ js/
   game.js               INAV.game: round state, rAF loop, spawn timer, crash/win detection
   debug.js              INAV.debug: overlay toggled with the D key (t, interval, open, score, screen)
   main.js               wires buttons/events, boots to Title
+  names.js              INAV.names: charset rule, leetspeak folding, and a two-tier blocklist — short substrings matched anywhere, and longer words matched only as whole tokens or contiguous token spans so a real name or word is never a false positive
+  leaderboard-local.js  INAV.leaderboardSource + INAV.leaderboardLocal: seeded fake rows persisted in localStorage, simulated latency, and console-driven forced modes (ready/offline/error/slow/empty) for testing every board state
+  leaderboard.js        INAV.leaderboard: client id, remembered name, ranking and submit validation against the active source
+  board-ui.js           INAV.boardUI: renders the board's loading/empty/offline/error states and the ranked rows, pins the player's row below the visible cut, and guards a slow response with a token counter so a stale load never overwrites a newer one
+  name-entry.js         INAV.nameEntry: the one name form, mounted on the win screen only (a lost run cannot reach the board); remembers every submitted run's placement in a WeakMap keyed by the run's own result object, and drops a submit's async resolution if the player has since moved to a different run
+  wheel.js              INAV.wheel: the taskbar start button's label wheel (start/leaderboard) while the title screen is up, freezing on real hover or keyboard focus and releasing the label back to the HUD off the title; tracks focus it caused itself with its own flag, since :focus-visible reads true for programmatic focus on a cold load and would freeze the wheel forever
 assets/
   icons/  fonts/  sounds/   (filled in as assets arrive)
 ```
@@ -196,11 +203,15 @@ Each iteration ships something playable, gets hand-tested against its checklist,
 | 3b | Green win screen, start-menu pause panel, scattered title ghosts | `plans/2026-09-11-iteration-3b-polish.md` |
 | 4b | Sweep-and-tick win transition (`winning` phase); tail eased to 3.7 spawns/sec at 1:00 | This file, §3 and §5 |
 | 4 | Playtest response: keyframed ramp (flat to 0:10, hard by 0:30), cap 18 at ~88% coverage, four pop-up types, install percentage, per-session tutorial, setup-wizard win screen | `plans/2026-09-12-iteration-4-difficulty.md` |
+| 7a | Leaderboard phase 1: wheel button, board window with podium, name entry, fake local source | `plans/2026-09-12-leaderboard-phase-1.md` |
 
-### Iteration 7 (next): Global leaderboard
+### Iteration 7b (next): Global leaderboard, phase 2
 
-Specced in `2026-09-12-leaderboard-design.md`. Phase one is the UI against a
-fake local source; phase two wires a backend and moves the game to GitHub Pages.
+Specced in `2026-09-12-leaderboard-design.md`. Phase 1 (shipped above) is the
+whole UI running against `js/leaderboard-local.js`. Phase 2 replaces that one
+file with a `fetch`-based source implementing the same four methods
+(`fetchTop`, `insert`, `rankOf`, `state`) and moves the game to GitHub Pages;
+nothing else in the game changes.
 
 ### Iteration 5 (deferred): Variety with behaviour
 

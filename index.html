@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/desktop.css">
   <link rel="stylesheet" href="css/window.css">
   <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/leaderboard.css">
 </head>
 <body>
   <div id="stage">
@@ -39,6 +40,7 @@
         <h1 class="title-logo">imnotavirus<span class="exe">.exe</span></h1>
         <p class="tagline">Your antivirus needs <span class="copy-seconds">60</span> seconds. The pop-ups need less.</p>
         <button class="btn" id="start-btn" type="button">start</button>
+        <button class="btn small" id="board-btn" type="button">leaderboard</button>
         <div class="stats">
           <span>Score: <strong id="title-last">0</strong></span>
           <span>Best: <strong id="title-best">0</strong></span>
@@ -85,6 +87,7 @@
             <span>Best: <strong id="success-best">0</strong></span>
           </div>
           <span class="badge" id="success-new-best" hidden>New best</span>
+          <div class="name-slot" id="success-name-slot"></div>
         </div>
         <div class="wizard-foot">
           <button class="btn small" id="play-again-btn" type="button">finish</button>
@@ -101,10 +104,37 @@
       <button class="btn" id="try-again-btn" type="button">try again</button>
     </section>
 
+    <section data-screen="board" hidden>
+      <div class="board">
+        <div class="board-bar">
+          <span id="board-heading">leaderboard.exe</span>
+          <button class="board-x" id="board-close" type="button" aria-label="Close leaderboard">✕</button>
+        </div>
+        <div class="board-body">
+          <div class="board-status" id="board-status" hidden></div>
+          <table class="board-table" id="board-table" aria-labelledby="board-heading">
+            <thead>
+              <tr><th class="col-rank" scope="col">rank</th><th scope="col">name</th><th class="col-score" scope="col">closed</th></tr>
+            </thead>
+            <tbody id="board-rows"></tbody>
+          </table>
+          <div class="board-mine-pin" id="board-mine" hidden></div>
+        </div>
+        <div class="board-foot">
+          <button class="btn small" id="board-back" type="button">back</button>
+        </div>
+      </div>
+    </section>
+
     <div id="taskbar">
       <button class="hud-start" id="start-menu" type="button" title="Pause (Esc)">
         <span class="hud-flag" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span id="hud-start-label">start</span>
+        <span class="hud-wheel">
+          <span class="wheel-track" id="wheel-track" aria-hidden="true">
+            <span id="hud-start-label">start</span>
+            <span>leaderboard</span>
+          </span>
+        </span>
       </button>
       <span class="hud-av">
         <span id="hud-label">Antivirus: not installed</span>
@@ -114,11 +144,28 @@
       <span class="hud-clock" id="hud-clock">12:00 PM</span>
     </div>
 
+    <form class="name-entry" id="name-entry" novalidate hidden>
+      <label for="name-input">Put this run on the leaderboard</label>
+      <div class="name-entry-row">
+        <input id="name-input" name="name" type="text" maxlength="12" autocomplete="off" spellcheck="false" placeholder="your name">
+        <button class="btn small" id="name-submit" type="submit">submit</button>
+      </div>
+      <p class="name-error" id="name-error" role="alert" hidden></p>
+      <p class="name-note">Letters, numbers and spaces, up to 12. Your name will be visible on a public board.</p>
+      <p class="name-placed" id="name-placed" hidden></p>
+    </form>
+
     <pre id="debug" hidden></pre>
   </div>
 
   <script src="js/config.js"></script>
+  <script src="js/names.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/leaderboard-local.js"></script>
+  <script src="js/leaderboard.js"></script>
+  <script src="js/board-ui.js"></script>
+  <script src="js/name-entry.js"></script>
+  <script src="js/wheel.js"></script>
   <script src="js/stage.js"></script>
   <script src="js/popups.js"></script>
   <script src="js/hud.js"></script>

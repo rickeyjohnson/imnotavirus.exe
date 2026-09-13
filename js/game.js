@@ -7,6 +7,7 @@
     spawnAcc: 0,
     nextSpawnIn: C.FIRST_SPAWN_MS,
     lastFrame: 0,
+    ramp: null,
     result: null,
     scores: {
       last: INAV.storage.get(C.STORAGE_KEYS.last, 0),
@@ -15,10 +16,30 @@
   };
   let onPhase = function () {};
   let tutorialShown = false;
+  let boardReturn = "title";
+  let boardPopupsEnabled = false; // restored on close, whatever it was on open
 
-  // Piecewise ramp: a flat 1/sec through 0:10, 3/sec at 0:30, tightening to the end.
+  // Rolls one round's ramp out of the config's per-keyframe ranges. Each
+  // keyframe lands anywhere between its slow and fast bound, then is clamped so
+  // it is never slower than the keyframe before it — a round that eased off
+  // partway through would read as a bug, not as luck.
+  function rollRamp() {
+    const keys = C.SPAWN_RAMP_RANGE;
+    const rolled = [];
+    let previous = Infinity;
+
+    keys.forEach((key) => {
+      const ms = key.slow + Math.random() * (key.fast - key.slow);
+      rolled.push({ t: key.t, ms: Math.min(ms, previous) });
+      previous = rolled[rolled.length - 1].ms;
+    });
+
+    return rolled;
+  }
+
+  // Piecewise ramp over whatever this round rolled.
   function interval(t) {
-    const keys = C.SPAWN_RAMP;
+    const keys = state.ramp;
     for (let i = 0; i < keys.length - 1; i++) {
       const a = keys[i];
       const b = keys[i + 1];
@@ -53,6 +74,7 @@
   }
 
   function resetRound() {
+    if (!state.ramp) state.ramp = rollRamp();
     INAV.popups.clear();
     state.t = 0;
     state.score = 0;
@@ -65,6 +87,22 @@
     resetRound();
     INAV.popups.setEnabled(false);
     setPhase("title");
+  }
+
+  // The board is reachable from the title and from either end screen, so it
+  // remembers where it was opened from rather than always returning to title.
+  function showBoard() {
+    if (state.phase === "board") return;
+    boardReturn = state.phase;
+    boardPopupsEnabled = INAV.popups.isEnabled();
+    INAV.popups.setEnabled(false);
+    setPhase("board");
+  }
+
+  function closeBoard() {
+    if (state.phase !== "board") return;
+    INAV.popups.setEnabled(boardPopupsEnabled);
+    setPhase(boardReturn === "board" ? "title" : boardReturn);
   }
 
   function startTutorial() {
@@ -92,6 +130,7 @@
 
   function startRound() {
     resetRound();
+    state.ramp = rollRamp();
     INAV.popups.setEnabled(true);
     setPhase("play");
   }
@@ -212,6 +251,8 @@
       requestAnimationFrame(frame);
     },
     goTitle,
+    showBoard,
+    closeBoard,
     startTutorial,
     togglePause,
     handleClose,

@@ -7,10 +7,12 @@
     paused: "Antivirus paused",
     crashing: "Antivirus installing…",
     winning: "Antivirus: protected",
+    board: "Antivirus: not installed",
     crash: "Antivirus failed",
     success: "Antivirus: protected",
   };
   let els = null;
+  let held = null; // taskbar state captured before the board opened
 
   function tickClock() {
     els.clock.textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -31,12 +33,31 @@
     },
 
     render(s) {
+      // The board is an overlay on whatever you were doing, not a state of the
+      // install, so the taskbar holds whatever it showed when the board opened
+      // instead of dropping back to "not installed" beside a live percentage.
+      if (s.phase === "board") {
+        if (held) {
+          els.fill.style.width = held.width;
+          els.label.textContent = held.label;
+          els.time.textContent = held.pct;
+        }
+        return;
+      }
+
       const done = s.phase === "success" || s.phase === "winning";
       const paused = s.phase === "paused";
       const progress = done ? 1 : Math.min(s.t / C.ROUND_SECONDS, 1);
-      els.fill.style.width = progress * 100 + "%";
+      const width = progress * 100 + "%";
+      const pct = Math.round(progress * 100) + "%";
+
+      els.fill.style.width = width;
       els.label.textContent = LABELS[s.phase];
-      els.time.textContent = Math.round(progress * 100) + "%";
+      els.time.textContent = pct;
+      held = { width: width, label: LABELS[s.phase], pct: pct };
+
+      // On the title screen the wheel owns this label, so don't fight it.
+      if (INAV.wheel && INAV.wheel.owns()) return;
 
       const startLabel = paused ? "resume" : s.phase === "play" ? "pause" : "start";
       if (els.startLabel.textContent !== startLabel) {

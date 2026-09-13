@@ -7,6 +7,7 @@
     paused: "paused",
     crashing: "play",
     winning: "play",
+    board: "board",
     crash: "crash",
     success: "success",
   };
@@ -132,7 +133,11 @@
     btn.disabled = true;
     lockTimer = setTimeout(() => {
       btn.disabled = false;
-      btn.focus();
+      // Only steal focus when it isn't already somewhere meaningful. A player
+      // who has clicked into the name field and is mid-word must not have
+      // focus yanked onto this button -- the next space they type would
+      // activate it and bail out to the title screen with the run unsubmitted.
+      if (!document.activeElement || document.activeElement === document.body) btn.focus();
     }, ms === undefined ? C.END_LOCKOUT_MS : ms);
   }
 
@@ -140,6 +145,7 @@
     $("title-last").textContent = s.scores.last;
     $("title-best").textContent = s.scores.best;
     $("start-btn").focus();
+    INAV.wheel.start();
     startGhosts();
   }
 
@@ -147,8 +153,7 @@
     $("pause-closed").textContent = s.score;
     $("pause-open").textContent = s.open;
     $("pause-progress").textContent = Math.round(Math.min(s.t / C.ROUND_SECONDS, 1) * 100) + "%";
-    const startBtn = $("start-menu");
-    if (startBtn) startBtn.focus();
+    if (INAV.wheel) INAV.wheel.focusSilently();
   }
 
   function enterCrash(s) {
@@ -166,6 +171,8 @@
       if (pct >= 100) clearInterval(pctTimer);
     }, C.CRASH_PCT_TICK_MS);
 
+    // Passed by reference (not a fresh literal) so that re-mounting for the
+
     lockButton($("try-again-btn"));
   }
 
@@ -174,6 +181,7 @@
     $("success-score").textContent = r.score;
     $("success-best").textContent = r.best;
     $("success-new-best").hidden = !r.isBest;
+    INAV.nameEntry.mount($("success-name-slot"), r);
 
     const wizard = document.querySelector('[data-screen="success"] .wizard');
     if (!wizard || reducedMotion.matches) {
@@ -198,11 +206,18 @@
     lockButton($("play-again-btn"), fillAt + C.END_LOCKOUT_MS);
   }
 
+  function enterBoard() {
+    INAV.boardUI.load();
+    const close = $("board-close");
+    if (close) close.focus();
+  }
+
   const ENTER = {
     title: enterTitle,
     paused: enterPaused,
     crash: enterCrash,
     success: enterSuccess,
+    board: enterBoard,
   };
 
   INAV.screens = {
@@ -223,12 +238,17 @@
       pctTimer = null;
       lockTimer = null;
       stopGhosts();
+      if (INAV.wheel) INAV.wheel.release();
+      if (INAV.nameEntry) INAV.nameEntry.unmount();
+      // Invalidate any board fetch still in flight so a slow response can't
+      // land in DOM the player has already left.
+      if (INAV.boardUI) INAV.boardUI.close();
       const name = SCREEN_FOR_PHASE[phase];
       document.querySelectorAll("[data-screen]").forEach((el) => {
         el.hidden = el.dataset.screen !== name;
       });
       const taskbar = document.getElementById("taskbar");
-      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash" || phase === "winning";
+      if (taskbar) taskbar.inert = phase === "crashing" || phase === "crash" || phase === "winning" || phase === "board";
       if (ENTER[phase]) ENTER[phase](s);
     },
   };
