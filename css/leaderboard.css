@@ -181,8 +181,15 @@
   font-family: var(--display);
   font-size: 18px;
 }
-/* The crash screen is ink-on-blue, so the form needs the paper treatment
-   there to keep every pairing above 4.5:1. */
+/* Paper text directly on --blue is only 4.11:1, under the 4.5:1 bar for
+   normal text -- the crash screen's copy sits on --blue-deep instead, which
+   clears it at 6.84:1. */
+[data-screen="crash"] .name-entry {
+  padding: 10px 12px;
+  background: var(--blue-deep);
+  border: var(--line-thin) solid var(--ink);
+  border-radius: var(--radius);
+}
 [data-screen="crash"] .name-entry > label,
 [data-screen="crash"] .name-note,
 [data-screen="crash"] .name-placed {
