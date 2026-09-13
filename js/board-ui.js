@@ -52,13 +52,9 @@
     data.rows.forEach((r, i) => {
       const row = body.rows[i];
       const cell = row.cells[1];
+      // No "survived" badge: only winners reach the board, so a badge on every
+      // row would say nothing.
       cell.textContent = r.name;
-      if (r.won) {
-        const badge = document.createElement("span");
-        badge.className = "won-badge";
-        badge.textContent = "survived";
-        cell.appendChild(badge);
-      }
       row.cells[2].textContent = r.score;
     });
 

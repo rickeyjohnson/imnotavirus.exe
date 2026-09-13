@@ -144,7 +144,7 @@
   function enterTitle(s) {
     $("title-last").textContent = s.scores.last;
     $("title-best").textContent = s.scores.best;
-    INAV.wheel.focusSilently();
+    $("start-btn").focus();
     INAV.wheel.start();
     startGhosts();
   }
@@ -153,8 +153,7 @@
     $("pause-closed").textContent = s.score;
     $("pause-open").textContent = s.open;
     $("pause-progress").textContent = Math.round(Math.min(s.t / C.ROUND_SECONDS, 1) * 100) + "%";
-    const startBtn = $("start-menu");
-    if (startBtn) startBtn.focus();
+    if (INAV.wheel) INAV.wheel.focusSilently();
   }
 
   function enterCrash(s) {
@@ -173,10 +172,6 @@
     }, C.CRASH_PCT_TICK_MS);
 
     // Passed by reference (not a fresh literal) so that re-mounting for the
-    // same crash -- e.g. after opening and closing the board with Esc, which
-    // re-runs enterCrash without a new round having happened -- lets
-    // INAV.nameEntry recognise it as the same run instead of a new one.
-    INAV.nameEntry.mount($("crash-name-slot"), r);
 
     lockButton($("try-again-btn"));
   }
@@ -243,7 +238,7 @@
       pctTimer = null;
       lockTimer = null;
       stopGhosts();
-      if (INAV.wheel) INAV.wheel.stop();
+      if (INAV.wheel) INAV.wheel.release();
       if (INAV.nameEntry) INAV.nameEntry.unmount();
       // Invalidate any board fetch still in flight so a slow response can't
       // land in DOM the player has already left.

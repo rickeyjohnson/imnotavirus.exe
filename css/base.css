@@ -14,10 +14,6 @@
   --silver: #C9D2DC;
   --bronze: #E09B6B;
 
-  /* Paper text on --blue is 4.11:1, under the 4.5:1 bar for normal text. This
-     deeper blue (6.84:1 with --paper) backs small print that sits on the crash
-     screen. Scoped deliberately: --blue itself is unchanged. */
-  --blue-deep: #0057BA;
 
   --line: 3px;
   --line-thin: 2px;

@@ -162,8 +162,8 @@ js/
   leaderboard-local.js  INAV.leaderboardSource + INAV.leaderboardLocal: seeded fake rows persisted in localStorage, simulated latency, and console-driven forced modes (ready/offline/error/slow/empty) for testing every board state
   leaderboard.js        INAV.leaderboard: client id, remembered name, ranking and submit validation against the active source
   board-ui.js           INAV.boardUI: renders the board's loading/empty/offline/error states and the ranked rows, pins the player's row below the visible cut, and guards a slow response with a token counter so a stale load never overwrites a newer one
-  name-entry.js         INAV.nameEntry: the one name-entry form, moved between whichever end screen is showing; remembers every submitted run's placement in a WeakMap keyed by the run's own result object (not just the latest run), and guards a submit's async resolution against the player having since moved to a different run
-  wheel.js              INAV.wheel: the rotating title button (start/leaderboard), freezing on real hover or keyboard focus; tracks focus it caused itself with its own flag, since a screen's auto-focus on entry must not freeze the wheel forever the way a real hover or tab-in would
+  name-entry.js         INAV.nameEntry: the one name form, mounted on the win screen only (a lost run cannot reach the board); remembers every submitted run's placement in a WeakMap keyed by the run's own result object, and drops a submit's async resolution if the player has since moved to a different run
+  wheel.js              INAV.wheel: the taskbar start button's label wheel (start/leaderboard) while the title screen is up, freezing on real hover or keyboard focus and releasing the label back to the HUD off the title; tracks focus it caused itself with its own flag, since :focus-visible reads true for programmatic focus on a cold load and would freeze the wheel forever
 assets/
   icons/  fonts/  sounds/   (filled in as assets arrive)
 ```

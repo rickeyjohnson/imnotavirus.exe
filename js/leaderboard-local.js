@@ -13,12 +13,13 @@
     "Tati", "cd rom", "Jamal", "floppy", "Imani", "wingding",
   ];
 
-  // Matches real play: a crowd between 40 and 110, a few winners above 130.
-  // A winner must be near the full 144 spawns, so wins only appear up high.
+  // Only winners reach the board, and a winner survived all 60 seconds, so
+  // every seeded score sits in the narrow band a survivor can actually post:
+  // the round spawns about 144 pop-ups and the winner closed nearly all of
+  // them. The spread is small on purpose — that is what a wins-only board
+  // looks like.
   function seedScore(i) {
-    if (i < 3) return 144 - i * 3;
-    if (i < 6) return 131 - i;
-    return 40 + Math.floor(Math.random() * 71);
+    return 144 - i - Math.floor(Math.random() * 3);
   }
 
   let forced = null; // null | "ready" | "offline" | "error" | "slow" | "empty"
@@ -38,7 +39,7 @@
         id: "seed-" + i,
         name: SEED_NAMES[i],
         score: score,
-        won: score >= 128,
+        won: true,
         clientId: "seed",
         at: now - (L.SEED_COUNT - i) * 3600000,
       });
