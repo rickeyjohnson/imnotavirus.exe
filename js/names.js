@@ -21,11 +21,11 @@
     "tranny", "twat",
   ];
 
-  // Innocent stems. A folded token that STARTS WITH one of these is dropped
-  // before the BLOCKED_WORDS substring check, so real words and names built
-  // on top of a blocked fragment ("classic", "Hancock", "Cassidy") survive
-  // while the fragment itself ("ass", "cock", "ass") stays caught everywhere
-  // else. Grouped by which BLOCKED_WORDS entry they'd otherwise trip.
+  // Innocent stems. A BLOCKED_WORDS hit is excused only when one of these
+  // occurs in the compacted name at a span that fully covers that exact hit
+  // ("classic" excuses "ass" because "class" covers it; "cassholes" does
+  // NOT excuse "asshole", because "cass" only covers part of it). Grouped by
+  // which BLOCKED_WORDS entry they'd otherwise trip.
   const ALLOW = [
     // anus
     "uranus", "manuscript",
@@ -96,17 +96,34 @@
 
     const folded = normalise(name);
     const compact = folded.replace(/ /g, "");
-    const words = folded.split(" ").filter(Boolean);
-
-    // Drop innocent tokens first, then concatenate the survivors and
-    // substring-match against that. This catches fused compounds
-    // ("asshole", "jackass", "bullshit") and token-straddling splits
-    // ("a ss hole", "as hit") alike, without flagging words ALLOW cleared.
-    const survivors = words.filter((w) => !ALLOW.some((stem) => w.startsWith(stem)));
-    const filtered = survivors.join("");
 
     if (BLOCKED_ANYWHERE.some((w) => compact.includes(w))) return { ok: false, error: "Pick a different name." };
-    if (BLOCKED_WORDS.some((w) => filtered.includes(w))) return { ok: false, error: "Pick a different name." };
+
+    // Exempt individual MATCHES, not whole tokens. Dropping a token that began
+    // with an innocent stem let anything appended to it ride in free —
+    // "cassholes" passed because the "cass" stem swallowed the entire token.
+    // A hit is excused only when an innocent stem covers that exact span.
+    function covered(start, end) {
+      return ALLOW.some((stem) => {
+        let at = compact.indexOf(stem);
+        while (at !== -1) {
+          if (at <= start && at + stem.length >= end) return true;
+          at = compact.indexOf(stem, at + 1);
+        }
+        return false;
+      });
+    }
+
+    const hit = BLOCKED_WORDS.some((word) => {
+      let at = compact.indexOf(word);
+      while (at !== -1) {
+        if (!covered(at, at + word.length)) return true;
+        at = compact.indexOf(word, at + 1);
+      }
+      return false;
+    });
+
+    if (hit) return { ok: false, error: "Pick a different name." };
 
     return { ok: true, name: name };
   }
