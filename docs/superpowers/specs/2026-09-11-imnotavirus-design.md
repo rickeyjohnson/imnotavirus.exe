@@ -80,7 +80,7 @@ Title ──start──▶ Tutorial ──close practice pop-up──▶ Gamepla
 | **Game Over** | Full-screen crash parody: `:(`, "Your PC ran into a problem…", an "X% complete" counter, round stats, a "New best" badge when earned, **try again** (goes to Title) |
 | **Success** | The desktop, cleared of pop-ups, with a finished setup wizard: "Installation complete", three ticked steps, a full striped bar, Closed/Best, a "New best" badge when earned, and **finish** (goes to Title). The taskbar stays visible reading 100% |
 
-Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `winning` (the desk sweeps itself clear, 0.2–1.0 s depending on how many pop-ups survived), `success`. Both `crashing` and `winning` leave the desktop on screen and make the taskbar `inert`, so neither ending can be paused.
+Screen states (in code, owned by `game.phase`): `title`, `tutorial`, `play`, `paused`, `crashing` (a ~400 ms beat with the pop-ups still visible before Game Over; the shake arrives in iteration 4), `crash`, `winning` (the desk sweeps itself clear, 0.2–1.0 s depending on how many pop-ups survived), `success`, `board` (the leaderboard window, reachable from Title, Game Over and Success; `game` remembers which of those three it was opened from and returns there). `crashing`, `winning` and `board` all make the taskbar `inert`, so none of the three can be paused from the taskbar.
 
 ## 5. Gameplay rules
 
@@ -147,6 +147,7 @@ css/
   window.css            the anchor pop-up (.win, .popup, animations)
   desktop.css           desktop icons, taskbar, start button, progress meter, clock
   screens.css           title, tutorial, pause panel, crash and win screens, buttons
+  leaderboard.css       the board window, medal podium, pinned-row and loading/empty/offline/error states
 js/
   config.js             INAV.config: every tuning knob + pop-up copy text
   storage.js            INAV.storage: safe localStorage get/set
@@ -157,6 +158,12 @@ js/
   game.js               INAV.game: round state, rAF loop, spawn timer, crash/win detection
   debug.js              INAV.debug: overlay toggled with the D key (t, interval, open, score, screen)
   main.js               wires buttons/events, boots to Title
+  names.js              INAV.names: charset rule, leetspeak folding, and a two-tier blocklist — short substrings matched anywhere, and longer words matched only as whole tokens or contiguous token spans so a real name or word is never a false positive
+  leaderboard-local.js  INAV.leaderboardSource + INAV.leaderboardLocal: seeded fake rows persisted in localStorage, simulated latency, and console-driven forced modes (ready/offline/error/slow/empty) for testing every board state
+  leaderboard.js        INAV.leaderboard: client id, remembered name, ranking and submit validation against the active source
+  board-ui.js           INAV.boardUI: renders the board's loading/empty/offline/error states and the ranked rows, pins the player's row below the visible cut, and guards a slow response with a token counter so a stale load never overwrites a newer one
+  name-entry.js         INAV.nameEntry: the one name-entry form, moved between whichever end screen is showing; remembers every submitted run's placement in a WeakMap keyed by the run's own result object (not just the latest run), and guards a submit's async resolution against the player having since moved to a different run
+  wheel.js              INAV.wheel: the rotating title button (start/leaderboard), freezing on real hover or keyboard focus; tracks focus it caused itself with its own flag, since a screen's auto-focus on entry must not freeze the wheel forever the way a real hover or tab-in would
 assets/
   icons/  fonts/  sounds/   (filled in as assets arrive)
 ```
@@ -196,11 +203,15 @@ Each iteration ships something playable, gets hand-tested against its checklist,
 | 3b | Green win screen, start-menu pause panel, scattered title ghosts | `plans/2026-09-11-iteration-3b-polish.md` |
 | 4b | Sweep-and-tick win transition (`winning` phase); tail eased to 3.7 spawns/sec at 1:00 | This file, §3 and §5 |
 | 4 | Playtest response: keyframed ramp (flat to 0:10, hard by 0:30), cap 18 at ~88% coverage, four pop-up types, install percentage, per-session tutorial, setup-wizard win screen | `plans/2026-09-12-iteration-4-difficulty.md` |
+| 7a | Leaderboard phase 1: wheel button, board window with podium, name entry, fake local source | `plans/2026-09-12-leaderboard-phase-1.md` |
 
-### Iteration 7 (next): Global leaderboard
+### Iteration 7b (next): Global leaderboard, phase 2
 
-Specced in `2026-09-12-leaderboard-design.md`. Phase one is the UI against a
-fake local source; phase two wires a backend and moves the game to GitHub Pages.
+Specced in `2026-09-12-leaderboard-design.md`. Phase 1 (shipped above) is the
+whole UI running against `js/leaderboard-local.js`. Phase 2 replaces that one
+file with a `fetch`-based source implementing the same four methods
+(`fetchTop`, `insert`, `rankOf`, `state`) and moves the game to GitHub Pages;
+nothing else in the game changes.
 
 ### Iteration 5 (deferred): Variety with behaviour
 
