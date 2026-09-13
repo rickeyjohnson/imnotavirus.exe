@@ -140,7 +140,7 @@
   function enterTitle(s) {
     $("title-last").textContent = s.scores.last;
     $("title-best").textContent = s.scores.best;
-    $("wheel-btn").focus();
+    INAV.wheel.focusSilently();
     INAV.wheel.start();
     startGhosts();
   }
