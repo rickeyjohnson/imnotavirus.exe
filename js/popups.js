@@ -159,5 +159,8 @@
     setEnabled(on) {
       enabled = on;
     },
+    isEnabled() {
+      return enabled;
+    },
   };
 })();

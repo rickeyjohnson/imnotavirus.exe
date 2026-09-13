@@ -66,6 +66,13 @@
         if (!programmatic) freeze();
       });
       btn.addEventListener("blur", thaw);
+      // Without this, toggling the OS reduced-motion setting mid-session
+      // leaves the aria-label stale until the next tick() -- up to 3s later,
+      // since tick() itself is a no-op while frozen or hovered.
+      reducedMotion.addEventListener("change", () => {
+        if (reducedMotion.matches) index = 0;
+        paint();
+      });
       paint();
     },
 

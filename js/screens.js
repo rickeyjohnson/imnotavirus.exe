@@ -133,7 +133,11 @@
     btn.disabled = true;
     lockTimer = setTimeout(() => {
       btn.disabled = false;
-      btn.focus();
+      // Only steal focus when it isn't already somewhere meaningful. A player
+      // who has clicked into the name field and is mid-word must not have
+      // focus yanked onto this button -- the next space they type would
+      // activate it and bail out to the title screen with the run unsubmitted.
+      if (!document.activeElement || document.activeElement === document.body) btn.focus();
     }, ms === undefined ? C.END_LOCKOUT_MS : ms);
   }
 
@@ -241,6 +245,9 @@
       stopGhosts();
       if (INAV.wheel) INAV.wheel.stop();
       if (INAV.nameEntry) INAV.nameEntry.unmount();
+      // Invalidate any board fetch still in flight so a slow response can't
+      // land in DOM the player has already left.
+      if (INAV.boardUI) INAV.boardUI.close();
       const name = SCREEN_FOR_PHASE[phase];
       document.querySelectorAll("[data-screen]").forEach((el) => {
         el.hidden = el.dataset.screen !== name;

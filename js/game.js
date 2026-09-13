@@ -16,6 +16,7 @@
   let onPhase = function () {};
   let tutorialShown = false;
   let boardReturn = "title";
+  let boardPopupsEnabled = false; // restored on close, whatever it was on open
 
   // Piecewise ramp: a flat 1/sec through 0:10, 3/sec at 0:30, tightening to the end.
   function interval(t) {
@@ -73,12 +74,14 @@
   function showBoard() {
     if (state.phase === "board") return;
     boardReturn = state.phase;
+    boardPopupsEnabled = INAV.popups.isEnabled();
     INAV.popups.setEnabled(false);
     setPhase("board");
   }
 
   function closeBoard() {
     if (state.phase !== "board") return;
+    INAV.popups.setEnabled(boardPopupsEnabled);
     setPhase(boardReturn === "board" ? "title" : boardReturn);
   }
 
