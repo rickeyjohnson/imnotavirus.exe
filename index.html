@@ -39,7 +39,12 @@
       <div class="center">
         <h1 class="title-logo">imnotavirus<span class="exe">.exe</span></h1>
         <p class="tagline">Your antivirus needs <span class="copy-seconds">60</span> seconds. The pop-ups need less.</p>
-        <button class="btn" id="start-btn" type="button">start</button>
+        <button class="btn wheel" id="wheel-btn" type="button" aria-label="start">
+          <span class="wheel-track" id="wheel-track" aria-hidden="true">
+            <span>start</span>
+            <span>leaderboard</span>
+          </span>
+        </button>
         <button class="btn small" id="board-btn" type="button">leaderboard</button>
         <div class="stats">
           <span>Score: <strong id="title-last">0</strong></span>
@@ -161,6 +166,7 @@
   <script src="js/leaderboard.js"></script>
   <script src="js/board-ui.js"></script>
   <script src="js/name-entry.js"></script>
+  <script src="js/wheel.js"></script>
   <script src="js/stage.js"></script>
   <script src="js/popups.js"></script>
   <script src="js/hud.js"></script>

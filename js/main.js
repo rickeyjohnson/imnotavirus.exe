@@ -7,8 +7,15 @@
   INAV.screens.init();
   INAV.popups.init($("popups"), (el) => INAV.game.handleClose(el));
   INAV.game.init((phase, s) => INAV.screens.show(phase, s));
+  INAV.wheel.init();
 
-  $("start-btn").addEventListener("click", () => INAV.game.startTutorial());
+  $("wheel-btn").addEventListener("click", () => {
+    if (INAV.wheel.action() === "board") {
+      INAV.game.showBoard();
+      return;
+    }
+    INAV.game.startTutorial();
+  });
   $("board-btn").addEventListener("click", () => INAV.game.showBoard());
   $("board-close").addEventListener("click", () => INAV.game.closeBoard());
   $("board-back").addEventListener("click", () => INAV.game.closeBoard());

@@ -140,7 +140,8 @@
   function enterTitle(s) {
     $("title-last").textContent = s.scores.last;
     $("title-best").textContent = s.scores.best;
-    $("start-btn").focus();
+    $("wheel-btn").focus();
+    INAV.wheel.start();
     startGhosts();
   }
 
@@ -238,6 +239,7 @@
       pctTimer = null;
       lockTimer = null;
       stopGhosts();
+      if (INAV.wheel) INAV.wheel.stop();
       if (INAV.nameEntry) INAV.nameEntry.unmount();
       const name = SCREEN_FOR_PHASE[phase];
       document.querySelectorAll("[data-screen]").forEach((el) => {
