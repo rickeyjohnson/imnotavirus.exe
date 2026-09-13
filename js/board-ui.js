@@ -88,9 +88,14 @@
         .catch((err) => {
           if (mine !== token) return;
           if (err && err.code === "offline") {
-            status("The global board needs the online version of the game. Your scores are still saved on this computer.");
+            status(
+              "Can't reach the leaderboard — check your internet connection. " +
+                'Your scores are still saved on this computer. <button class="btn small" id="board-retry" type="button">retry</button>'
+            );
+            const offlineRetry = $("board-retry");
+            if (offlineRetry) offlineRetry.addEventListener("click", () => INAV.boardUI.load());
           } else {
-            status('Could not load the board. <button class="btn small" id="board-retry" type="button">retry</button>');
+            status('Error loading the leaderboard. <button class="btn small" id="board-retry" type="button">retry</button>');
             const retry = $("board-retry");
             if (retry) retry.addEventListener("click", () => INAV.boardUI.load());
           }

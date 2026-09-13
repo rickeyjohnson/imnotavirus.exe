@@ -16,7 +16,7 @@ bronze for the top three, and highlights the row the current player just set.
 
 | Decision | Choice | Why |
 |---|---|---|
-| Hosting | **GitHub Pages is the leaderboard build.** Double-clicking `index.html` still plays, but reports the leaderboard as offline and keeps using local scores | A page at `file://` has the opaque origin `null`; Chrome blocks cross-origin `fetch` from it in the common case and other browsers are inconsistent. A global board needs a real origin |
+| Hosting | **Live at https://rickeyjohnson.github.io/imnotavirus.exe/, served from `main`.** Double-clicking `index.html` reaches the same live board | Corrected 2026-09-13 by measurement. This row used to predict that a `file://` page would be cut off from the board and fall back to offline. It isn't: Supabase answers a request from the opaque `null` origin with `Access-Control-Allow-Origin: null`, and a real Chromium loading `index.html` off disk read all five rows. Both builds get the real board; the offline copy is now only for an actually-dead connection |
 | Who gets an entry | **Winners only.** A round you survive can put a name on the board; a round you lose cannot. Ranked by pop-ups closed | Rickey's call, revised 2026-09-13 after seeing the board. The cost was raised and accepted: a winner closed nearly all of ~144 spawned pop-ups, so every entry lands in a narrow band and ties are common, and at the current difficulty the board fills slowly. The upside is that appearing on it means something |
 | Repeat plays | **Every run is its own row** | Rickey's call, over the one-row-per-player alternative. Accepted costs: one player can occupy the whole podium, and the table grows without bound. Mitigated by showing the top 25 only, not by changing the data |
 | Identity | A random `clientId` in `localStorage`, used **only** to highlight your own rows | No accounts, no auth, no personal data beyond the name you type |
@@ -77,13 +77,11 @@ or `navigator.onLine` is `false`, or the rejection is a `TypeError` (what
 that classification as `.code`; the UI branches on `.code`, never on
 `.message`, and never renders a raw exception's text to the player.
 
-Phase one ships `js/leaderboard-local.js`: about 30 seeded rows whose scores
-follow real play (a crowd between 40 and 110, a few winners above 130), stored
-in `localStorage`. It **simulates latency, failure and offline**, with debug
-toggles to force each (`INAV.leaderboardLocal.force("offline" | "error" | "slow" | "empty" | "ready")`
-and `.reset()`), so the loading, empty, offline and error states get designed
-now rather than discovered in phase two. Phase two replaces that one file with
-a `fetch`-based implementation of the same four `leaderboardSource` methods;
+Phase one shipped `js/leaderboard-local.js` (since deleted): about 30 seeded
+rows stored in `localStorage`, simulating latency, failure and offline with
+debug toggles to force each, so the loading, empty, offline and error states
+got designed rather than discovered against a real network. Phase two replaced
+that one file with a `fetch`-based implementation of the same four `leaderboardSource` methods;
 nothing else in the game knows which source is behind the seam.
 
 ## 5. Screens
@@ -150,18 +148,41 @@ speed bump plus a server-side floor, not a guarantee.
 - Every new colour pairing gets measured against 4.5:1 for normal text and 3:1
   for text at 18.66px bold or larger, per the main spec.
 
-## 8. Phase two: the backend
+## 8. The backend (shipped 2026-09-13)
 
-Phase 1 shipped on 2026-09-12: the whole UI runs against
-`js/leaderboard-local.js`. Phase 2 replaces that one file with a `fetch`-based
-source implementing the same four methods (`fetchTop`, `insert`, `rankOf`,
-`state`) and changes nothing else in the game.
+Phase 1 shipped on 2026-09-12 against `js/leaderboard-local.js`. Phase 2
+replaced that one file with `js/leaderboard-supabase.js` and changed nothing
+else in the game — the seam held exactly as designed.
 
-Not built. Sketch for when it is: one table `scores` (`id`, `name`, `score`,
-`won`, `client_id`, `created_at`); row-level security permitting `INSERT` and
-`SELECT` but never `UPDATE` or `DELETE`; a `CHECK` constraint for the charset,
-length and score range; a `BEFORE INSERT` trigger for the blocklist. The anon
-key ships in the page, which is what it is for.
+**Supabase project** `cjqxzszojziapsiljqwr`, free tier. The schema lives in
+`supabase/schema.sql` and is applied by pasting it into the SQL Editor; it is
+written to be safely re-runnable.
+
+- One table, `public.scores`: `id` (identity, `generated always` so a client
+  can never supply one), `name`, `score`, `won`, `client_id`, `created_at`.
+- **Row-level security** with a `SELECT` policy and an `INSERT` policy and
+  *no* `UPDATE` or `DELETE` policy, which under RLS means those are refused
+  outright. Verified by attack, not by reading: a `DELETE` against `id=gt.0`
+  and a `PATCH` setting every `score` to 999, both sent with the anon key,
+  left all five rows and every score untouched. PostgREST answers both with
+  `204` — that is "your request was valid and matched zero rows you are
+  allowed to touch", not "done".
+- **`CHECK` constraints** mirroring the client: `name ~ '^[A-Za-z0-9 ]{1,12}$'`
+  and `score between 0 and 250`.
+- **A `BEFORE INSERT` trigger** mirroring `js/names.js`, including the
+  contiguous-token-span check, so `"a ss hole"` is refused server-side too.
+  One deliberate difference: Postgres regex has no backreference in the search
+  pattern, so the "collapse runs of 3+ identical characters" step is a loop
+  rather than the single regex the client uses.
+
+**The anon key ships in `js/config.js` and in git.** That is what it is for:
+it grants only what the RLS policies above allow. The `service_role` key and
+the database password appear nowhere in this repo and must never.
+
+**Reading the total.** `fetchTop` and `rankOf` both need a count, which
+PostgREST returns in a `Content-Range` header when the request carries
+`Prefer: count=exact`. That header is in Supabase's
+`Access-Control-Expose-Headers` by default, so browser JS can read it.
 
 ## 9. Known limits
 

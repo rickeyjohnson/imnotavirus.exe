@@ -64,6 +64,17 @@ INAV.config = {
     fakeRows: "inav.fakeRows",
   },
 
+  // Project URL and anon/public key from Supabase's Project Settings -> API.
+  // Both are meant to be public: the anon key only grants what the schema's
+  // row-level security policies allow (insert and select, never update or
+  // delete), so shipping it in this file -- and in the page's source, and in
+  // git history -- is the intended way to use it, not a leak.
+  SUPABASE: {
+    URL: "https://cjqxzszojziapsiljqwr.supabase.co",
+    ANON_KEY:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqcXh6c3pvanppYXBzaWxqcXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyOTQzNjcsImV4cCI6MjEwNDg3MDM2N30.8hB_7u09JM_bhj84Jp4TmLUAtMaD2cUGfTLEjXNffbg",
+  },
+
   LEADERBOARD: {
     VISIBLE: 25,
     WHEEL_MS: 3000,

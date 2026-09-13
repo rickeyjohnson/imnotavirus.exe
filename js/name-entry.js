@@ -102,7 +102,7 @@
         // way, a raw exception's own text (e.g. "Failed to fetch") is never
         // what reaches the player -- the offline/error branches are fixed copy.
         if (err && err.code === "offline") {
-          showError("No connection to the board. Your score is still saved here.");
+          showError("Can't reach the leaderboard — check your internet connection. Your score is still saved here.");
         } else if (err && err.code === "error") {
           showError("That didn't send. Try again.");
         } else {

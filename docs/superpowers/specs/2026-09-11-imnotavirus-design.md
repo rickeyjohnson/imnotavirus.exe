@@ -159,7 +159,7 @@ js/
   debug.js              INAV.debug: overlay toggled with the D key (t, interval, open, score, screen)
   main.js               wires buttons/events, boots to Title
   names.js              INAV.names: charset rule, leetspeak folding, and a two-tier blocklist — short substrings matched anywhere, and longer words matched only as whole tokens or contiguous token spans so a real name or word is never a false positive
-  leaderboard-local.js  INAV.leaderboardSource + INAV.leaderboardLocal: seeded fake rows persisted in localStorage, simulated latency, and console-driven forced modes (ready/offline/error/slow/empty) for testing every board state
+  leaderboard-supabase.js  INAV.leaderboardSource: the live backend, four fetch() calls against Supabase's REST API -- top rows, insert, rank-by-count, last-known state. The only file phase 2 replaced
   leaderboard.js        INAV.leaderboard: client id, remembered name, ranking and submit validation against the active source
   board-ui.js           INAV.boardUI: renders the board's loading/empty/offline/error states and the ranked rows, pins the player's row below the visible cut, and guards a slow response with a token counter so a stale load never overwrites a newer one
   name-entry.js         INAV.nameEntry: the one name form, mounted on the win screen only (a lost run cannot reach the board); remembers every submitted run's placement in a WeakMap keyed by the run's own result object, and drops a submit's async resolution if the player has since moved to a different run
@@ -207,10 +207,11 @@ Each iteration ships something playable, gets hand-tested against its checklist,
 
 ### Iteration 7b (next): Global leaderboard, phase 2
 
-Specced in `2026-09-12-leaderboard-design.md`. Phase 1 (shipped above) is the
-whole UI running against `js/leaderboard-local.js`. Phase 2 replaces that one
-file with a `fetch`-based source implementing the same four methods
-(`fetchTop`, `insert`, `rankOf`, `state`) and moves the game to GitHub Pages;
+Specced in `2026-09-12-leaderboard-design.md`. Both phases have shipped. Phase 1
+built the whole UI against a fake local source; phase 2 replaced that single
+file with `js/leaderboard-supabase.js`, a `fetch`-based source implementing the
+same four methods (`fetchTop`, `insert`, `rankOf`, `state`), and changed
+nothing else. The game is live on GitHub Pages;
 nothing else in the game changes.
 
 ### Iteration 5 (deferred): Variety with behaviour
