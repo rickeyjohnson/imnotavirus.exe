@@ -3,6 +3,7 @@
   const K = C.STORAGE_KEYS;
 
   let lastId = null; // the row from the run just submitted, highlighted on the board
+  let lastRank = null;
 
   function clientId() {
     let id = INAV.storage.get(K.clientId, null);
@@ -24,7 +25,7 @@
     },
 
     me() {
-      return { clientId: clientId(), name: storedName(), lastId: lastId };
+      return { clientId: clientId(), name: storedName(), lastId: lastId, lastRank: lastRank };
     },
 
     rememberName(name) {
@@ -68,11 +69,10 @@
         .insert({ name: checked.name, score: score, won: !!entry.won, clientId: clientId() })
         .then((res) => {
           lastId = res.id;
-          return INAV.leaderboardSource.rankOf({ score: score, at: res.at }).then((rank) => ({
-            id: res.id,
-            rank: rank,
-            total: 0,
-          }));
+          return INAV.leaderboardSource.rankOf({ score: score, at: res.at }).then((rank) => {
+            lastRank = rank;
+            return { id: res.id, rank: rank, total: 0 };
+          });
         });
     },
   };

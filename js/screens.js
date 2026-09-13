@@ -200,6 +200,7 @@
   }
 
   function enterBoard() {
+    INAV.boardUI.load();
     const close = $("board-close");
     if (close) close.focus();
   }
