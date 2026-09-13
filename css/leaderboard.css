@@ -187,7 +187,14 @@
    button isn't permanently sized to "leaderboard" during a round. */
 .hud-wheel {
   display: block;
-  height: 28px;
+  height: 34px;
+  /* overflow:hidden clips both axes, and the clip box hugs the text exactly --
+     so the lean on an italic word's last glyph was being shaved off, which read
+     as "resume" and "leaderboard" being cut short. Clipping happens at the
+     padding edge, so this buys the ink room on the right while keeping the
+     vertical clip the wheel actually needs. The button's own right padding is
+     reduced by the same amount so it doesn't get wider. */
+  padding-right: 8px;
   overflow: hidden;
 }
 .wheel-track {
@@ -198,7 +205,7 @@
 .wheel-track > span {
   display: flex;
   align-items: center;
-  height: 28px;
+  height: 34px;
   white-space: nowrap;
 }
 .wheel-track > span:nth-child(2) {
@@ -208,7 +215,7 @@
   display: flex;
 }
 .wheel-track.at-1 {
-  transform: translateY(-28px);
+  transform: translateY(-34px);
 }
 
 #board-btn { display: none; }
