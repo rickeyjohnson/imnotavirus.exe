@@ -120,3 +120,71 @@
   background: rgba(39, 53, 72, 0.12);
   border-radius: calc(var(--radius) / 3);
 }
+
+.name-entry[hidden] {
+  display: none;
+}
+.name-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 4px auto 0;
+  text-align: center;
+}
+.name-entry > label {
+  font-family: var(--display);
+  font-size: 16px;
+}
+.name-entry-row[hidden] {
+  display: none;
+}
+.name-entry-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+#name-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  font-family: var(--font);
+  font-size: 17px;
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--line-thin) solid var(--ink);
+  border-radius: calc(var(--radius) / 2);
+}
+#name-input:focus-visible {
+  outline: var(--line) solid var(--ink);
+  outline-offset: 2px;
+}
+.name-error {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--warn);
+  border: var(--line-thin) solid var(--ink);
+  border-radius: calc(var(--radius) / 2);
+}
+.name-note {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.75;
+}
+.name-placed {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 18px;
+}
+/* The crash screen is ink-on-blue, so the form needs the paper treatment
+   there to keep every pairing above 4.5:1. */
+[data-screen="crash"] .name-entry > label,
+[data-screen="crash"] .name-note,
+[data-screen="crash"] .name-placed {
+  color: var(--paper);
+}

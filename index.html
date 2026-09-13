@@ -87,6 +87,7 @@
             <span>Best: <strong id="success-best">0</strong></span>
           </div>
           <span class="badge" id="success-new-best" hidden>New best</span>
+          <div class="name-slot" id="success-name-slot"></div>
         </div>
         <div class="wizard-foot">
           <button class="btn small" id="play-again-btn" type="button">finish</button>
@@ -99,6 +100,7 @@
       <h2>Your PC ran into a problem and needs to restart.</h2>
       <p>You closed <strong id="crash-score">0</strong> pop-ups before your desktop ran out of room (best: <strong id="crash-best">0</strong>), and the antivirus was <strong id="crash-progress">0</strong>% installed.</p>
       <span class="badge" id="crash-new-best" hidden>New best</span>
+      <div class="name-slot" id="crash-name-slot"></div>
       <p class="crash-pct"><span id="crash-pct">0</span>% complete</p>
       <button class="btn" id="try-again-btn" type="button">try again</button>
     </section>
@@ -138,6 +140,17 @@
       <span class="hud-clock" id="hud-clock">12:00 PM</span>
     </div>
 
+    <form class="name-entry" id="name-entry" novalidate hidden>
+      <label for="name-input">Put this run on the leaderboard</label>
+      <div class="name-entry-row">
+        <input id="name-input" name="name" type="text" maxlength="12" autocomplete="off" spellcheck="false" placeholder="your name">
+        <button class="btn small" id="name-submit" type="submit">submit</button>
+      </div>
+      <p class="name-error" id="name-error" role="alert" hidden></p>
+      <p class="name-note">Letters, numbers and spaces, up to 12. Your name will be visible on a public board.</p>
+      <p class="name-placed" id="name-placed" hidden></p>
+    </form>
+
     <pre id="debug" hidden></pre>
   </div>
 
@@ -147,6 +160,7 @@
   <script src="js/leaderboard-local.js"></script>
   <script src="js/leaderboard.js"></script>
   <script src="js/board-ui.js"></script>
+  <script src="js/name-entry.js"></script>
   <script src="js/stage.js"></script>
   <script src="js/popups.js"></script>
   <script src="js/hud.js"></script>

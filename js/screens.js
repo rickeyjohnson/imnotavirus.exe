@@ -167,6 +167,12 @@
       if (pct >= 100) clearInterval(pctTimer);
     }, C.CRASH_PCT_TICK_MS);
 
+    // Passed by reference (not a fresh literal) so that re-mounting for the
+    // same crash -- e.g. after opening and closing the board with Esc, which
+    // re-runs enterCrash without a new round having happened -- lets
+    // INAV.nameEntry recognise it as the same run instead of a new one.
+    INAV.nameEntry.mount($("crash-name-slot"), r);
+
     lockButton($("try-again-btn"));
   }
 
@@ -175,6 +181,7 @@
     $("success-score").textContent = r.score;
     $("success-best").textContent = r.best;
     $("success-new-best").hidden = !r.isBest;
+    INAV.nameEntry.mount($("success-name-slot"), r);
 
     const wizard = document.querySelector('[data-screen="success"] .wizard');
     if (!wizard || reducedMotion.matches) {
@@ -231,6 +238,7 @@
       pctTimer = null;
       lockTimer = null;
       stopGhosts();
+      if (INAV.nameEntry) INAV.nameEntry.unmount();
       const name = SCREEN_FOR_PHASE[phase];
       document.querySelectorAll("[data-screen]").forEach((el) => {
         el.hidden = el.dataset.screen !== name;
