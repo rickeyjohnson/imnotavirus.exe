@@ -11,21 +11,30 @@ INAV.config = {
   FIRST_SPAWN_MS: 600,
   // Each keyframe is a RANGE, rolled fresh at the start of every round, so no
   // two rounds ramp identically. `slow` and `fast` are gaps in milliseconds —
-  // a bigger gap is an easier round. The bounds span the two ramps this game
-  // has actually shipped: the eased one and the harder one before it, so the
-  // last fifteen seconds land somewhere between about 3.3 and 4.4 spawns a
-  // second. The roll is then forced to stay monotonic, so a round can never
-  // get slower as it goes on.
-  // Measured across 1500 simulated rounds per click speed: 2.5 clicks/sec
-  // never survives, 2.8 wins a quarter of the time, 3.0 is a coin flip at 61%,
-  // 3.2 wins 92%, 3.5 always wins. The roll is what turns the old hard cliff
-  // between 2.5 and 3.0 into that gradient.
+  // a bigger gap is an easier round. The roll is clamped monotonic, so a round
+  // can never get slower as it goes on.
+  //
+  // The t=40 keyframe exists to make the last twenty seconds their own, steeper
+  // segment rather than a straight interpolation from 0:30 to the end.
+  //
+  // Spawns per second at each keyframe: ~0.93-1.0 until 0:10, 2.7-3.0 at 0:30,
+  // 3.4-3.9 at 0:40, 4.0-5.5 at 1:00.
+  //
+  // Measured over 2000 simulated rounds per click speed: 3.0 clicks/sec never
+  // survives, 3.2 wins 6% of the time, 3.5 is a coin flip at 53%, 3.8 wins 97%.
   SPAWN_RAMP_RANGE: [
     { t: 0, slow: 1080, fast: 1000 },
     { t: 10, slow: 1050, fast: 1000 },
     { t: 30, slow: 370, fast: 333 },
-    { t: 60, slow: 270, fast: 200 },
+    { t: 40, slow: 292, fast: 255 },
+    { t: 60, slow: 250, fast: 182 },
   ],
+  // The roll is deliberately not uniform: `Math.random()` is raised to 1/BIAS,
+  // which pushes it toward each keyframe's `fast` (harder) end. 1 would be an
+  // even spread; 2 lands the median at roughly two thirds of the way up the
+  // range. Easy rounds still happen, they are just no longer as common as hard
+  // ones.
+  SPAWN_ROLL_BIAS: 2,
   SPAWN_JITTER_PCT: 0.3,
   MAX_DT_MS: 100,
 

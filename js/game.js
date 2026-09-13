@@ -29,7 +29,11 @@
     let previous = Infinity;
 
     keys.forEach((key) => {
-      const ms = key.slow + Math.random() * (key.fast - key.slow);
+      // Biased toward the fast end of the range rather than evenly spread --
+      // see SPAWN_ROLL_BIAS. Math.min keeps the ramp monotonic: a keyframe can
+      // never come out slower than the one before it.
+      const roll = Math.pow(Math.random(), 1 / C.SPAWN_ROLL_BIAS);
+      const ms = key.slow + roll * (key.fast - key.slow);
       rolled.push({ t: key.t, ms: Math.min(ms, previous) });
       previous = rolled[rolled.length - 1].ms;
     });
