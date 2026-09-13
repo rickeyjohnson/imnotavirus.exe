@@ -106,6 +106,7 @@
 
     const type = pickType(opts.type);
     const el = create(x, y, w, h, type, opts.title || pick(type.titles), opts.message || pick(type.messages));
+    if (INAV.audio) INAV.audio.play("popup");
     if (cell >= 0) el.dataset.cell = String(cell);
     if (opts.practice) el.dataset.practice = "1";
     return el;
@@ -114,7 +115,13 @@
   function close(el, notify) {
     el.classList.add("closing");
     setTimeout(() => el.remove(), C.CLOSE_ANIM_MS);
-    if (notify !== false) onClose(el);
+    // Only the player's own closes make a sound. The win sweep closes every
+    // surviving pop-up 50 ms apart, and seventeen of these at once would be a
+    // wall of noise over the moment the player just earned.
+    if (notify !== false) {
+      if (INAV.audio) INAV.audio.play("close");
+      onClose(el);
+    }
   }
 
   function handlePointerDown(e) {

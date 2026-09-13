@@ -8,6 +8,16 @@
   INAV.popups.init($("popups"), (el) => INAV.game.handleClose(el));
   INAV.game.init((phase, s) => INAV.screens.show(phase, s));
   INAV.wheel.init();
+  INAV.audio.init();
+
+  // Every button in the game shares one click sound.
+  document.addEventListener(
+    "pointerdown",
+    (e) => {
+      if (e.button === 0 && e.target.closest("button")) INAV.audio.play("button");
+    },
+    true
+  );
 
   $("start-btn").addEventListener("click", () => INAV.game.startTutorial());
   $("board-btn").addEventListener("click", () => INAV.game.showBoard());

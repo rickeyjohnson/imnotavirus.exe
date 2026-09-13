@@ -5,7 +5,7 @@ INAV.config = {
   STAGE_H: 720,
   TASKBAR_H: 56,
 
-  CAP: 18,
+  CAP: 15,
   ROUND_SECONDS: 60,
 
   FIRST_SPAWN_MS: 600,
@@ -71,6 +71,31 @@ INAV.config = {
     clientId: "inav.clientId",
     playerName: "inav.playerName",
     fakeRows: "inav.fakeRows",
+  },
+
+  // Volumes are RMS-matched from the actual decoded files, not picked by ear.
+  // Raw levels were nearly 9x apart (button_click 0.036 RMS, failed_error
+  // 0.306), which is exactly how one sound ends up drowning another. Each
+  // volume below brings its file to roughly the same perceived level, then the
+  // two "moment" sounds -- the title music and the crash tone -- are nudged up
+  // on purpose, since nothing competes with them.
+  //
+  // `offset` skips measured leading silence. popup_clicked has 113 ms of it and
+  // failed_error_screen has 603 ms, which would otherwise read as input lag.
+  AUDIO: {
+    ENABLED: true,
+    MASTER: 1,
+    SOUNDS: {
+      // A pop-up arriving. Also used for the title screen's background ghosts.
+      popup: { src: "audio/popup_appears.wav", volume: 1, offset: 0, voices: 6, minGapMs: 60 },
+      // The player closing a pop-up.
+      close: { src: "audio/popup_clicked.mp3", volume: 0.25, offset: 0.1, voices: 6, minGapMs: 45 },
+      // Any UI button.
+      button: { src: "audio/button_click.mp3", volume: 1, offset: 0.05, voices: 2 },
+      // The crash screen.
+      crash: { src: "audio/failed_error_screen.mp3", volume: 0.3, offset: 0.55, voices: 1 },
+    },
+    CRASH_REPEAT_MS: 60000,
   },
 
   // Project URL and anon/public key from Supabase's Project Settings -> API.

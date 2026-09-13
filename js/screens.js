@@ -105,7 +105,12 @@
       }
       const ghosts = ghostsRoot().querySelectorAll(".ghost");
       const one = ghosts[Math.floor(Math.random() * ghosts.length)];
-      if (one) one.classList.toggle("ghost-on");
+      if (one) {
+        const appearing = one.classList.toggle("ghost-on");
+        // Only when a ghost pops IN, so the title screen sounds like pop-ups
+        // arriving rather than clicking in and out.
+        if (appearing && INAV.audio) INAV.audio.play("popup");
+      }
       scheduleGhost();
     }, g.min + Math.random() * (g.max - g.min));
   }
@@ -173,6 +178,7 @@
 
     // Passed by reference (not a fresh literal) so that re-mounting for the
 
+    if (INAV.audio) INAV.audio.startLoop("crash", C.AUDIO.CRASH_REPEAT_MS);
     lockButton($("try-again-btn"));
   }
 
@@ -239,6 +245,7 @@
       lockTimer = null;
       stopGhosts();
       if (INAV.wheel) INAV.wheel.release();
+      if (INAV.audio) INAV.audio.stopAll();
       if (INAV.nameEntry) INAV.nameEntry.unmount();
       // Invalidate any board fetch still in flight so a slow response can't
       // land in DOM the player has already left.
