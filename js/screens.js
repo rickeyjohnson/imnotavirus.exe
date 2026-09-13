@@ -105,12 +105,9 @@
       }
       const ghosts = ghostsRoot().querySelectorAll(".ghost");
       const one = ghosts[Math.floor(Math.random() * ghosts.length)];
-      if (one) {
-        const appearing = one.classList.toggle("ghost-on");
-        // Only when a ghost pops IN, so the title screen sounds like pop-ups
-        // arriving rather than clicking in and out.
-        if (appearing && INAV.audio) INAV.audio.play("popup");
-      }
+      // Silent on purpose: the background ghosts are decoration, and the
+      // arrival sound belongs to a pop-up that can actually cost you.
+      if (one) one.classList.toggle("ghost-on");
       scheduleGhost();
     }, g.min + Math.random() * (g.max - g.min));
   }
